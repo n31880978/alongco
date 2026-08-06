@@ -1,0 +1,314 @@
+ADMIN
+admin.alongco.com — desktop, 1280px
+Same palette as the public site, at operator density: dark rail, hairline tables, monospace for money and references. The confirmation queue is the screen that runs the business until WhatsApp is automated, so it is built first and flags anything unsent for more than fifteen minutes.
+01 · DASHBOARD
+ALONG CO
+ADMIN
+Dashboard
+Bookings
+Confirmation queue
+3
+Companions
+Customers
+Payments and payouts
+Reviews
+2
+Incidents
+Settings
+Priya · owner
+EVERY ACTION IS LOGGED
+Thursday 6 August
+SERVICE HOURS 08:00–22:00 IST · ALL TIMES LOCAL
+3 confirmations unsent
+BOOKINGS TODAY
+6
+4 confirmed · 2 held
+UNSENT CONFIRMATIONS
+3
+1 overdue past 15 min
+OPEN INCIDENTS
+1
+Conduct · investigating
+REVENUE THIS WEEK
+₹18,463
+37 hours booked · 1 refund
+TODAY'S SCHEDULE
+TIME
+COMPANION
+CUSTOMER
+AREA
+STATUS
+14:00
+Arjun R.
+Meera S.
+MG ROAD
+RUNNING
+16:30
+Kabir M.
+Divya N.
+INDIRANAGAR
+CONFIRMED
+18:00
+Arjun R.
+Ananya R.
+CUBBON PARK
+UNSENT
+20:00
+Rohan D.
+—
+MG ROAD
+HELD 6:41
+NEEDS YOU NOW
+AC-7F3K2M · unsent 21 minutes
+Paid at 21:34. The customer has heard nothing since the ticket.
+Open queue
+Incident #14 · conduct
+Booking ended early on 2 Aug. Awaiting the companion's written account.
+2 reviews waiting
+Nothing publishes without moderation.
+02 · CONFIRMATION QUEUE — the screen that runs the business
+ALONG CO
+ADMIN
+Dashboard
+Bookings
+Confirmation queue
+3
+Companions
+Customers
+Payments and payouts
+Reviews
+Incidents
+Settings
+Confirmation queue
+Newly paid bookings. Copy the message, send it from WhatsApp Business, then mark it sent.
+UNSENT · 3
+SENT TODAY · 4
+OVERDUE · 21 MIN
+AC-7F3K2M
+PAID 21:34 · CASHFREE · ₹499.00
+CUSTOMER
+Ananya Rao
++91 98xxx xxxxx
+BOOKING
+Arjun R. · Sat 8 Aug, 4:00–5:00 pm · Cubbon Park · 1 hour
+CUSTOMER NOTE
+"I'd rather not talk much — I want to see the exhibition."
+MESSAGE TO SEND
+TEMPLATE v3 · CUSTOMER
+Hello Ananya — this is AlongCo confirming your booking AC-7F3K2M.
+Arjun will meet you on Saturday 8 August at 4:00 pm at Cubbon Park, for one hour. He has your first name and your note.
+Please reply to this message so we know it reached you, and tell us the exact spot you would like to meet.
+If anything feels wrong before or during the booking, call this number and we will step in.
+Copy message
+Open wa.me/9198xxxxxxxx
+Companion message
+Mark sent
+6 MIN AGO
+AC-9K2P4L
+PAID 21:49 · CASHFREE · ₹898.00
+Divya Nair
++91 91xxx xxxxx
+Kabir M. · Sun 9 Aug, 11:00 am–1:00 pm · Indiranagar · 2 hours (−10%)
+Hello Divya — this is AlongCo confirming your booking AC-9K2P4L. Kabir will meet you on Sunday 9 August at 11:00 am in Indiranagar, for two hours…
+Copy message
+Open wa.me/9191xxxxxxxx
+Mark sent
+✓
+AC-3M8T1Q
+Meera S. · Arjun R. · today 2:00 pm · MG Road
+SENT BY PRIYA · 19:12 · 4 MIN AFTER PAYMENT
+03 · BOOKINGS, WITH THE REFUND PREVIEW OPEN
+ALONG CO
+ADMIN
+Dashboard
+Bookings
+Confirmation queue
+Companions
+Customers
+Payments and payouts
+Reviews
+Incidents
+Settings
+Bookings
+SEARCH REFERENCE OR PHONE
+CONFIRMED
+ALL STATUSES
+REFERENCE
+CUSTOMER
+COMPANION
+WHEN
+AMOUNT
+STATUS
+AC-7F3K2M
+Ananya Rao
+Arjun R.
+SAT 8 · 16:00
+₹499
+CONFIRMED
+AC-9K2P4L
+Divya Nair
+Kabir M.
+SUN 9 · 11:00
+₹898
+CONFIRMED
+AC-3M8T1Q
+Meera Suresh
+Arjun R.
+THU 6 · 14:00
+₹499
+RUNNING
+AC-5H1W7B
+Ritika Jain
+Kabir M.
+TUE 4 · 18:00
+₹1,048
+COMPLETED
+AC-2J6R9V
+Sneha K.
+Rohan D.
+SAT 2 · 17:00
+₹499
+ENDED EARLY
+AC-8D4Y3N
+Tara B.
+Arjun R.
+FRI 1 · 19:00
+₹499
+EXPIRED
+AC-7F3K2M
+CONFIRMED
+Customer
+Ananya Rao · +91 98xxx xxxxx
+Companion
+Arjun R.
+When
+Sat 8 Aug, 16:00–17:00
+Terms accepted
+v1.2 · 6 Aug 21:33
+CANCEL — REFUND PREVIEW
+Starts in
+42h 26m
+Tier applied
+24–48H · 50%
+Refund to customer
+₹249.50
+Cancel and refund ₹249.50
+Reschedule
+Mark no-show
+Record an incident
+Every action here writes to the audit log with your name and the reason you give.
+04–09 · COMPANIONS · CUSTOMERS · PAYMENTS · REVIEWS · INCIDENTS · SETTINGS
+Companions
+6 LISTED · 1 PAUSED
+PSEUDONYM
+RATE
+AREAS
+HOURS
+STATE
+Arjun R.
+₹499
+CUBBON, MG RD
+WED–SUN 14–22
+ACTIVE
+Kabir M.
+₹499
+INDIRANAGAR
+DAILY 09–18
+ACTIVE
+Rohan D.
+₹499
+MG ROAD
+FRI–SUN 16–22
+PAUSED
+Legal name, ID document and vetting notes sit behind a restricted panel and never enter a customer-facing query.
+ADD COMPANION
+Customers
+148 · 1 DELETION REQUEST
+NAME
+PHONE
+BOOKINGS
+LAST
+STATE
+Ananya Rao
++91 98xxx xxxxx
+3
+SAT 8 AUG
+OK
+Sneha K.
++91 90xxx xxxxx
+1
+SAT 2 AUG
+BLOCKED
+Tara B.
++91 99xxx xxxxx
+0
+—
+ERASURE
+Erasure requests are answered within thirty days: bookings are anonymised, payment records are retained as the law requires.
+Payments and payouts
+WEEK TO 6 AUG
+CAPTURED
+₹18,463
+REFUNDED
+₹249
+OWED TO COMPANIONS
+₹11,077
+COMPANION
+HOURS
+OWED
+PAYOUT
+Arjun R.
+21
+₹6,287
+MARK PAID · UTR
+Kabir M.
+16
+₹4,790
+PAID · UTR 4471…
+Reviews
+2 AWAITING MODERATION
+Ritika J. on Kabir M.
+4.0
+BOOKING AC-5H1W7B · COMPLETED
+Easy three hours. He suggested a place I would not have found, and did not make it weird when I wanted to just read for a while.
+Publish
+Hold
+Reject
+Sneha K. on Rohan D.
+1.0
+LINKED TO INCIDENT #14
+Held while the incident is open. Reviews tied to an open incident are never published automatically.
+Incidents
+1 OPEN · 4 RESOLVED
+#14 · Conduct violation
+INVESTIGATING
+Booking AC-2J6R9V, 2 Aug. Companion ended the booking after 20 minutes and reported the customer. No refund issued, per the accepted terms. Customer blocked pending review.
+REPORTED BY COMPANION
+BOOKING ENDED · YES
+REFUND · NONE
+#13 · No-show, companion
+RESOLVED
+Full refund plus priority rebooking. Companion warned; second occurrence deactivates him.
+Settings
+CHANGE THESE, NOT THE CODE
+BOOKING RULES
+Minimum duration
+60 MIN
+Buffer after a booking
+15 MIN
+Payment hold
+10 MIN
+Booking window
+7 DAYS
+Service hours
+08:00–22:00
+REFUND TIERS
+48 hours or more before
+100%
+24 to 48 hours before
+50%
+Under 24 hours
+0%
+AUDIT LOG · LAST ENTRY
+PRIYA · REFUND.ISSUE · AC-2J6R9V
+6 AUG 18:22 · ₹0 · CONDUCT_NO_REFUND

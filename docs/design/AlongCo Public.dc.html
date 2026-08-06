@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300..800;1,400&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,400&display=swap" rel="stylesheet"><style>
+body{margin:0;background:#e9e7e2;font-family:'Public Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#2E63E8;text-decoration:none}a:hover{color:#16161a}
+@keyframes acRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes acDrift{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(6%,4%,0) scale(1.14)}100%{transform:translate3d(0,0,0) scale(1)}}
+@keyframes acDrift2{0%{transform:translate3d(0,0,0) scale(1.05)}50%{transform:translate3d(-7%,-5%,0) scale(.94)}100%{transform:translate3d(0,0,0) scale(1.05)}}
+@keyframes acSheen{0%{transform:translateX(-120%)}55%{transform:translateX(220%)}100%{transform:translateX(220%)}}
+@keyframes acPulse{0%{opacity:1;transform:scale(1)}70%{opacity:0;transform:scale(2.6)}100%{opacity:0;transform:scale(2.6)}}
+@keyframes acPrint{0%{transform:translateY(-100%)}100%{transform:translateY(0)}}
+@keyframes acHead{0%{top:0;opacity:0}6%{opacity:.9}96%{opacity:.9}100%{top:100%;opacity:0}}
+@keyframes acStamp{0%{opacity:0;transform:rotate(-9deg) scale(1.5)}70%{opacity:0;transform:rotate(-9deg) scale(1.5)}82%{opacity:.9;transform:rotate(-9deg) scale(.97)}100%{opacity:.82;transform:rotate(-9deg) scale(1)}}
+@keyframes acFadeIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important}}
+</style></helmet>
+
+<section style="padding:40px 48px 30px;background:#f4f2ee;border-bottom:1px solid rgba(0,0,0,.08)">
+<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:18px"><span style="font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#16161a;color:#fff;border-radius:4px">FINAL</span><span style="font:600 13px 'Public Sans',sans-serif;color:#16161a">The public app — mobile, 375px</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,320px);gap:0 44px;align-items:start">
+<div style="font:400 12.5px/1.65 'Public Sans',sans-serif;color:rgba(0,0,0,.68)"><div style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#2E63E8;margin-bottom:8px">THE LANDING</div>Built on the 2a hero: booking begins above the fold with a live seven-day strip and time chips, over a drifting aurora field with grain. Everything below is the confidence argument in order — what it is, what it is not, how it works, what it costs, conduct.</div>
+<div style="font:400 12.5px/1.65 'Public Sans',sans-serif;color:rgba(0,0,0,.68)"><div style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#C7456B;margin-bottom:8px">THE TICKET</div>Printed on warm stock, not designed on screen: perforated edges, a tear line with punched notches, scanline ink texture, dot-matrix reference, barcode stub and a PAID stamp that lands late. It prints itself out of a slot on load, in stepped frames, and skips entirely under reduced motion.</div>
+<div style="font:400 12.5px/1.65 'Public Sans',sans-serif;color:rgba(0,0,0,.68)"><div style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.08em;color:rgba(0,0,0,.4);margin-bottom:8px">STILL PLACEHOLDER</div>Support number, the barcode and QR patterns, and the portrait crop. Everything else is real: ₹499 with 10% and 30% duration discounts, the 48/24-hour refund tiers, 8am–10pm, seven-day window, one-hour minimum, pseudonyms only.</div>
+</div>
+</section>
+
+<section style="padding:44px 48px 40px">
+<div style="display:flex;flex-wrap:nowrap;gap:40px;align-items:flex-start;width:max-content">
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 11.5px 'Public Sans',sans-serif;color:rgba(0,0,0,.6)">01 · LANDING</div>
+<div style="width:375px;background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.09);overflow:hidden;position:relative">
+<div style="height:34px;display:flex;align-items:center;justify-content:center;background:#ecebe6;border-bottom:1px solid rgba(22,22,26,.08);font:500 11px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45);letter-spacing:.03em">alongco.com</div>
+<div style="height:3px;background:linear-gradient(90deg,#2E63E8,#8A6BEF 45%,#F76D8A)"></div>
+
+<div style="position:relative;overflow:hidden;background:#FBFAF7">
+<div style="position:absolute;width:340px;height:340px;left:-120px;top:-130px;border-radius:50%;background:radial-gradient(circle,rgba(46,99,232,.34),rgba(46,99,232,0) 68%);filter:blur(26px);animation:acDrift 16s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:absolute;width:300px;height:300px;right:-110px;top:-60px;border-radius:50%;background:radial-gradient(circle,rgba(247,109,138,.36),rgba(247,109,138,0) 68%);filter:blur(26px);animation:acDrift2 19s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:absolute;width:260px;height:260px;left:40px;bottom:-150px;border-radius:50%;background:radial-gradient(circle,rgba(138,107,239,.26),rgba(138,107,239,0) 68%);filter:blur(30px);animation:acDrift 22s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:absolute;inset:0;background-image:url(assets/grain.png);background-size:180px 180px;opacity:.5;mix-blend-mode:multiply;pointer-events:none"></div>
+
+<div style="position:relative;padding:16px 20px 24px">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:26px">
+<div style="display:flex;align-items:center;gap:9px">
+<img src="assets/mark.png" alt="" style="width:26px;height:26px;display:block" />
+<span style="font:600 12.5px 'Public Sans',sans-serif;letter-spacing:.18em;color:#16161a">ALONG CO</span>
+</div>
+<span style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#2E4FA8;background:rgba(255,255,255,.72);border:1px solid rgba(46,99,232,.2);border-radius:20px;padding:5px 10px;backdrop-filter:blur(8px)">BANGALORE</span>
+</div>
+
+<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border:1px solid rgba(22,22,26,.08);border-radius:20px;padding:6px 11px 6px 9px;margin-bottom:16px;backdrop-filter:blur(10px);box-shadow:0 2px 10px rgba(22,22,26,.05);animation:acRise .6s cubic-bezier(.2,.7,.3,1) both">
+<span style="position:relative;width:7px;height:7px;flex:none"><span style="position:absolute;inset:0;border-radius:50%;background:#1F9D6B"></span><span style="position:absolute;inset:0;border-radius:50%;background:#1F9D6B;animation:acPulse 2.4s ease-out infinite"></span></span>
+<span style="font:600 10.5px ui-monospace,Menlo,monospace;letter-spacing:.04em;color:#16161a">6 COMPANIONS FREE TODAY</span>
+</div>
+
+<h1 style="margin:0 0 14px;font:300 36px/1.08 'Newsreader',Georgia,serif;letter-spacing:-.02em;color:#16161a">
+<span style="display:block;animation:acRise .7s cubic-bezier(.2,.7,.3,1) .06s both">Someone to come</span>
+<span style="display:block;animation:acRise .7s cubic-bezier(.2,.7,.3,1) .16s both">along, for an</span>
+<span style="display:block;animation:acRise .7s cubic-bezier(.2,.7,.3,1) .26s both">hour.</span>
+</h1>
+<p style="margin:0 0 20px;font:400 15px/1.55 'Public Sans',sans-serif;color:rgba(22,22,26,.7);max-width:310px;text-wrap:pretty;animation:acRise .7s cubic-bezier(.2,.7,.3,1) .34s both">A public place you choose, an hour you booked, and a clear way to end it. <span style="color:#16161a;font-weight:600">₹499 an hour.</span></p>
+
+<div style="background:rgba(255,255,255,.82);border:1px solid rgba(22,22,26,.09);border-radius:12px;padding:14px 14px 15px;backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(22,22,26,.09);animation:acRise .7s cubic-bezier(.2,.7,.3,1) .44s both">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+<span style="font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:rgba(22,22,26,.45)">WHEN SUITS YOU</span>
+<span style="font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#2E63E8">NEXT 7 DAYS</span>
+</div>
+<div style="display:flex;gap:6px;margin-bottom:12px">
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:8px;background:#16161a"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(255,255,255,.55)">TODAY</div><div style="font:600 14px 'Public Sans',sans-serif;color:#fff;margin-top:2px">6</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:8px;background:#fff;border:1px solid rgba(22,22,26,.1)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">FRI</div><div style="font:600 14px 'Public Sans',sans-serif;color:#16161a;margin-top:2px">7</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:8px;background:#fff;border:1px solid rgba(22,22,26,.1)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">SAT</div><div style="font:600 14px 'Public Sans',sans-serif;color:#16161a;margin-top:2px">8</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:8px;background:#fff;border:1px solid rgba(22,22,26,.1)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">SUN</div><div style="font:600 14px 'Public Sans',sans-serif;color:#16161a;margin-top:2px">9</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:8px;background:#F5F4F0;border:1px solid rgba(22,22,26,.06)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.25)">MON</div><div style="font:600 14px 'Public Sans',sans-serif;color:rgba(22,22,26,.28);margin-top:2px">10</div></div>
+</div>
+<div style="display:flex;gap:6px;margin-bottom:14px">
+<span style="flex:1;text-align:center;font:600 11.5px ui-monospace,Menlo,monospace;color:#2E4FA8;background:#EDF1FD;border:1px solid rgba(46,99,232,.2);border-radius:7px;padding:9px 0">4:00 PM</span>
+<span style="flex:1;text-align:center;font:600 11.5px ui-monospace,Menlo,monospace;color:#2E4FA8;background:#EDF1FD;border:1px solid rgba(46,99,232,.2);border-radius:7px;padding:9px 0">6:00 PM</span>
+<span style="flex:1;text-align:center;font:600 11.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.28);background:#F5F4F0;border:1px solid rgba(22,22,26,.07);border-radius:7px;padding:9px 0;text-decoration:line-through">7:30 PM</span>
+</div>
+<div style="position:relative;overflow:hidden;height:50px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#2E63E8,#F76D8A);border-radius:8px;box-shadow:0 8px 20px rgba(46,99,232,.26)">
+<span style="font:600 15px 'Public Sans',sans-serif;color:#fff;position:relative;z-index:1">See who's free at 4:00 pm</span>
+<span style="position:absolute;top:0;bottom:0;width:38%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.34),rgba(255,255,255,0));animation:acSheen 4.4s ease-in-out infinite;pointer-events:none"></span>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:16px;animation:acRise .7s cubic-bezier(.2,.7,.3,1) .52s both">
+<span style="font:500 11px 'Public Sans',sans-serif;color:rgba(22,22,26,.6)">Public places only</span>
+<span style="font:500 11px 'Public Sans',sans-serif;color:rgba(22,22,26,.3)">·</span>
+<span style="font:500 11px 'Public Sans',sans-serif;color:rgba(22,22,26,.6)">No romance, at any price</span>
+<span style="font:500 11px 'Public Sans',sans-serif;color:rgba(22,22,26,.3)">·</span>
+<span style="font:500 11px 'Public Sans',sans-serif;color:rgba(22,22,26,.6)">Total shown before you sign in</span>
+</div>
+</div>
+</div>
+
+<div style="padding:24px 20px;background:#EDF1FD;border-top:1px solid rgba(46,99,232,.14);background-image:radial-gradient(rgba(46,99,232,.11) 1px,transparent 1px);background-size:15px 15px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:13px"><span style="width:14px;height:2px;background:#2E63E8"></span><span style="font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:#2E63E8">WHAT THIS IS</span></div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-bottom:24px">
+<div style="display:flex;gap:11px;font:400 14px/1.45 'Public Sans',sans-serif;color:#16161a;background:#fff;border-radius:6px;padding:12px 13px;box-shadow:0 1px 2px rgba(22,22,26,.05)"><span style="width:6px;height:6px;border-radius:50%;background:#2E63E8;flex:none;margin-top:7px"></span><span>A booked hour of company in a public place — a coffee, a film, a gallery, a walk.</span></div>
+<div style="display:flex;gap:11px;font:400 14px/1.45 'Public Sans',sans-serif;color:#16161a;background:#fff;border-radius:6px;padding:12px 13px;box-shadow:0 1px 2px rgba(22,22,26,.05)"><span style="width:6px;height:6px;border-radius:50%;background:#2E63E8;flex:none;margin-top:7px"></span><span>A fixed price you see before you enter any details.</span></div>
+<div style="display:flex;gap:11px;font:400 14px/1.45 'Public Sans',sans-serif;color:#16161a;background:#fff;border-radius:6px;padding:12px 13px;box-shadow:0 1px 2px rgba(22,22,26,.05)"><span style="width:6px;height:6px;border-radius:50%;background:#2E63E8;flex:none;margin-top:7px"></span><span>A ticket with a reference, so there is a record of what you booked.</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:13px"><span style="width:14px;height:2px;background:#E8557A"></span><span style="font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:#C7456B">WHAT THIS IS NOT</span></div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;gap:11px;font:400 14px/1.45 'Public Sans',sans-serif;color:#16161a;background:#FDEFF3;border-radius:6px;padding:12px 13px"><span style="width:6px;height:6px;background:#E8557A;flex:none;margin-top:7px"></span><span>Not a date, and not a step towards one.</span></div>
+<div style="display:flex;gap:11px;font:400 14px/1.45 'Public Sans',sans-serif;color:#16161a;background:#FDEFF3;border-radius:6px;padding:12px 13px"><span style="width:6px;height:6px;background:#E8557A;flex:none;margin-top:7px"></span><span>Nothing romantic or sexual is on offer, at any price.</span></div>
+<div style="display:flex;gap:11px;font:400 14px/1.45 'Public Sans',sans-serif;color:#16161a;background:#FDEFF3;border-radius:6px;padding:12px 13px"><span style="width:6px;height:6px;background:#E8557A;flex:none;margin-top:7px"></span><span>Not a friendship app. There is no chatting for weeks first.</span></div>
+</div>
+</div>
+
+<div style="padding:26px 20px 24px;background:#fff;border-top:1px solid rgba(22,22,26,.08)">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:18px"><span style="width:14px;height:2px;background:linear-gradient(90deg,#2E63E8,#F76D8A)"></span><span style="font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(22,22,26,.45)">HOW IT WORKS</span></div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:13px"><span style="flex:none;width:28px;height:28px;border-radius:50%;background:#EDF1FD;color:#2E63E8;font:600 11px ui-monospace,Menlo,monospace;display:flex;align-items:center;justify-content:center">01</span><div><div style="font:600 14.5px/1.3 'Public Sans',sans-serif;color:#16161a;margin-bottom:3px">Choose a companion</div><div style="font:400 13.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.62)">Photo, rate, the areas he covers, and reviews from women who have actually met him.</div></div></div>
+<div style="display:flex;gap:13px"><span style="flex:none;width:28px;height:28px;border-radius:50%;background:#EDF1FD;color:#2E63E8;font:600 11px ui-monospace,Menlo,monospace;display:flex;align-items:center;justify-content:center">02</span><div><div style="font:600 14.5px/1.3 'Public Sans',sans-serif;color:#16161a;margin-bottom:3px">Pick a time and a place</div><div style="font:400 13.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.62)">Any free slot in the next seven days. You choose which of the three areas you meet in.</div></div></div>
+<div style="display:flex;gap:13px"><span style="flex:none;width:28px;height:28px;border-radius:50%;background:#FDEFF3;color:#C7456B;font:600 11px ui-monospace,Menlo,monospace;display:flex;align-items:center;justify-content:center">03</span><div><div style="font:600 14.5px/1.3 'Public Sans',sans-serif;color:#16161a;margin-bottom:3px">Pay, and get your ticket</div><div style="font:400 13.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.62)">Full amount upfront. We message you on WhatsApp within fifteen minutes to confirm the details.</div></div></div>
+</div>
+</div>
+
+<div style="padding:24px 20px 26px;background:#fbfaf7;border-top:1px solid rgba(22,22,26,.08)">
+<div style="border:1px solid rgba(46,99,232,.18);border-radius:9px;background:#fff;overflow:hidden;box-shadow:0 2px 10px rgba(46,99,232,.08)">
+<div style="height:3px;background:linear-gradient(90deg,#2E63E8,#F76D8A)"></div>
+<div style="padding:14px 16px 11px;font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:#2E4FA8;border-bottom:1px solid rgba(22,22,26,.08);background:#F7F9FE">WHAT IT COSTS</div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:13px 16px;border-bottom:1px solid rgba(22,22,26,.07)"><span style="font:400 14px 'Public Sans',sans-serif;color:#16161a">One hour</span><span style="font:600 15px ui-monospace,Menlo,monospace;color:#16161a">₹499</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:13px 16px;border-bottom:1px solid rgba(22,22,26,.07)"><span style="font:400 14px 'Public Sans',sans-serif;color:#16161a">Two hours <span style="font:600 10px ui-monospace,Menlo,monospace;color:#C7456B;background:#FDEFF3;border-radius:3px;padding:3px 5px;margin-left:2px">−10%</span></span><span style="font:600 15px ui-monospace,Menlo,monospace;color:#16161a">₹898</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:13px 16px"><span style="font:400 14px 'Public Sans',sans-serif;color:#16161a">Three hours or more <span style="font:600 10px ui-monospace,Menlo,monospace;color:#C7456B;background:#FDEFF3;border-radius:3px;padding:3px 5px;margin-left:2px">−30%</span></span><span style="font:600 15px ui-monospace,Menlo,monospace;color:#16161a">₹1,048</span></div>
+<div style="padding:12px 16px 14px;background:#FDEFF3;border-top:1px solid rgba(232,85,122,.18);font:400 12.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.68)">Full amount at checkout. Cancel 48 hours ahead for a full refund, 24 to 48 hours for half. No refund inside 24 hours.</div>
+</div>
+</div>
+
+<div style="position:relative;padding:28px 20px 26px;background:#16161a;overflow:hidden">
+<div style="position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#2E63E8,#F76D8A)"></div>
+<img src="assets/mark.png" alt="" style="position:absolute;width:230px;right:-64px;bottom:-40px;opacity:.16;pointer-events:none" />
+<div style="position:relative">
+<div style="font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:#9DB4F6;margin-bottom:14px">CONDUCT, AND WHAT WE DO NOT CLAIM</div>
+<div style="font:300 21px/1.35 'Newsreader',Georgia,serif;color:#fff;margin-bottom:18px;text-wrap:pretty">You meet in a public place you chose. If anything feels wrong, you can leave.</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px">
+<div style="font:400 13.5px/1.5 'Public Sans',sans-serif;color:rgba(255,255,255,.8);border-left:2px solid #4B7BF5;padding-left:12px">Companions are men. They are listed under a pseudonym with a current photograph, and their real names are never shown.</div>
+<div style="font:400 13.5px/1.5 'Public Sans',sans-serif;color:rgba(255,255,255,.8);border-left:2px solid #F98CA2;padding-left:12px">Your companion may end the booking immediately if the conduct terms are broken, with no refund. You agree to those terms in writing before you pay.</div>
+<div style="font:400 13.5px/1.5 'Public Sans',sans-serif;color:rgba(255,255,255,.8);border-left:2px solid rgba(255,255,255,.28);padding-left:12px">We do not call anyone background-checked, because we do not run background checks. What we do have: a signed conduct agreement, a real photograph, and a record of every booking.</div>
+</div>
+<div style="height:1px;background:rgba(255,255,255,.14);margin-bottom:16px"></div>
+<div style="display:flex;flex-direction:column;gap:7px;font:400 12.5px/1.5 'Public Sans',sans-serif;color:rgba(255,255,255,.55)">
+<div>Questions before you book, any time we are open: <span style="font:500 12.5px ui-monospace,Menlo,monospace;color:#F98CA2">+91 80 4xxx xxxx</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:4px"><a href="#landing" style="color:#9DB4F6">Conduct policy</a><a href="#landing" style="color:#9DB4F6">Refunds</a><a href="#landing" style="color:#9DB4F6">Privacy</a><a href="#landing" style="color:#9DB4F6">Terms</a></div>
+</div>
+</div>
+</div>
+
+<sc-if value="{{ showFold }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:0;right:0;top:849px;border-top:1px dashed rgba(46,99,232,.5);pointer-events:none"><span style="position:absolute;right:6px;top:4px;font:500 8.5px ui-monospace,Menlo,monospace;color:rgba(46,99,232,.75)">FOLD 375×812</span></div></sc-if>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 11.5px 'Public Sans',sans-serif;color:rgba(0,0,0,.6)">02 · BROWSE</div>
+<div style="width:375px;background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.09);overflow:hidden">
+<div style="height:34px;display:flex;align-items:center;justify-content:center;background:#ecebe6;border-bottom:1px solid rgba(22,22,26,.08);font:500 11px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">alongco.com/companions</div>
+<div style="height:3px;background:linear-gradient(90deg,#2E63E8,#8A6BEF 45%,#F76D8A)"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="display:flex;align-items:center;gap:9px"><img src="assets/mark.png" alt="" style="width:24px;height:24px;display:block" /><span style="font:600 11.5px 'Public Sans',sans-serif;letter-spacing:.18em;color:#16161a">ALONG CO</span></div>
+<span style="font:600 10px ui-monospace,Menlo,monospace;color:#2E4FA8;background:#EDF1FD;border:1px solid rgba(46,99,232,.16);border-radius:20px;padding:5px 9px">BANGALORE</span>
+</div>
+<div style="padding:18px 18px 14px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="font:300 25px/1.2 'Newsreader',Georgia,serif;color:#16161a;margin-bottom:6px">Taking bookings this week</div>
+<div style="font:400 13px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.6)">Six men, listed under pseudonyms with current photographs. ₹499 an hour each.</div>
+</div>
+<div style="display:flex;gap:7px;padding:12px 18px;background:#fbfaf7;border-bottom:1px solid rgba(22,22,26,.09);overflow:hidden">
+<span style="font:600 10.5px ui-monospace,Menlo,monospace;color:#fff;background:#16161a;border-radius:20px;padding:7px 11px;white-space:nowrap">ALL AREAS ▾</span>
+<span style="font:600 10.5px ui-monospace,Menlo,monospace;color:#2E4FA8;background:#EDF1FD;border:1px solid rgba(46,99,232,.18);border-radius:20px;padding:7px 11px;white-space:nowrap">FREE TODAY</span>
+<span style="font:600 10.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.55);background:#fff;border:1px solid rgba(22,22,26,.12);border-radius:20px;padding:7px 11px;white-space:nowrap">1 HOUR ▾</span>
+</div>
+<div style="padding:14px 18px 18px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:13px;background:#fff;border:1px solid rgba(22,22,26,.1);border-radius:10px;padding:13px;box-shadow:0 1px 3px rgba(22,22,26,.05)">
+<div style="position:relative;width:84px;height:108px;flex:none;border-radius:7px;overflow:hidden;background:#dfe6f8">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(128deg,rgba(46,99,232,.13) 0 8px,rgba(46,99,232,0) 8px 16px)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:4px 5px;font:500 6.5px ui-monospace,Menlo,monospace;letter-spacing:.06em;color:rgba(22,22,26,.55);background:rgba(251,250,247,.85)">PORTRAIT 3:4</div>
+</div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px"><span style="font:600 16px 'Public Sans',sans-serif;color:#16161a">Arjun R.</span><span style="font:600 13px ui-monospace,Menlo,monospace;color:#16161a">₹499<span style="font:500 9.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">/HR</span></span></div>
+<div style="font:500 10.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.5);margin-bottom:7px">CUBBON PARK · MG ROAD</div>
+<div style="font:400 12.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.62);margin-bottom:9px">Quiet company. Knows the galleries and most of the coffee.</div>
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font:600 10.5px ui-monospace,Menlo,monospace;color:#16161a">4.8</span>
+<span style="font:400 10.5px 'Public Sans',sans-serif;color:rgba(22,22,26,.5)">· 23 verified reviews</span>
+<span style="margin-left:auto;font:600 9.5px ui-monospace,Menlo,monospace;color:#1F7A5A;background:#E8F5EF;border-radius:3px;padding:4px 6px">FREE 4PM</span>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:13px;background:#fff;border:1px solid rgba(22,22,26,.1);border-radius:10px;padding:13px;box-shadow:0 1px 3px rgba(22,22,26,.05)">
+<div style="position:relative;width:84px;height:108px;flex:none;border-radius:7px;overflow:hidden;background:#f3dfe6">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(128deg,rgba(232,85,122,.14) 0 8px,rgba(232,85,122,0) 8px 16px)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:4px 5px;font:500 6.5px ui-monospace,Menlo,monospace;letter-spacing:.06em;color:rgba(22,22,26,.55);background:rgba(251,250,247,.85)">PORTRAIT 3:4</div>
+</div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px"><span style="font:600 16px 'Public Sans',sans-serif;color:#16161a">Kabir M.</span><span style="font:600 13px ui-monospace,Menlo,monospace;color:#16161a">₹499<span style="font:500 9.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">/HR</span></span></div>
+<div style="font:500 10.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.5);margin-bottom:7px">INDIRANAGAR</div>
+<div style="font:400 12.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.62);margin-bottom:9px">Talks about films. Happy to sit through one instead.</div>
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font:600 10.5px ui-monospace,Menlo,monospace;color:#16161a">4.6</span>
+<span style="font:400 10.5px 'Public Sans',sans-serif;color:rgba(22,22,26,.5)">· 11 verified reviews</span>
+<span style="margin-left:auto;font:600 9.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45);background:#F1EFEA;border-radius:3px;padding:4px 6px">NEXT: FRI</span>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:13px;background:#fff;border:1px solid rgba(22,22,26,.1);border-radius:10px;padding:13px;opacity:.72">
+<div style="position:relative;width:84px;height:108px;flex:none;border-radius:7px;overflow:hidden;background:#e6e3dc;filter:grayscale(1)">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(128deg,rgba(22,22,26,.1) 0 8px,rgba(22,22,26,0) 8px 16px)"></div>
+</div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px"><span style="font:600 16px 'Public Sans',sans-serif;color:#16161a">Rohan D.</span><span style="font:600 13px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.5)">₹499<span style="font:500 9.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">/HR</span></span></div>
+<div style="font:500 10.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45);margin-bottom:9px">MG ROAD</div>
+<div style="font:600 9.5px ui-monospace,Menlo,monospace;color:#8A6A22;background:#FBF2DC;border-radius:3px;padding:5px 7px;display:inline-block">PAUSED — NOT TAKING BOOKINGS THIS WEEK</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 11.5px 'Public Sans',sans-serif;color:rgba(0,0,0,.6)">03 · COMPANION PROFILE</div>
+<div style="width:375px;background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.09);overflow:hidden">
+<div style="height:34px;display:flex;align-items:center;justify-content:center;background:#ecebe6;border-bottom:1px solid rgba(22,22,26,.08);font:500 11px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">alongco.com/c/arjun-r</div>
+<div style="position:relative;height:280px;background:#dfe6f8;overflow:hidden">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(128deg,rgba(46,99,232,.13) 0 9px,rgba(46,99,232,0) 9px 18px)"></div>
+<img src="assets/mark.png" alt="" style="position:absolute;width:250px;left:50%;top:48%;transform:translate(-50%,-50%);opacity:.2" />
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,16,20,.45),rgba(15,16,20,0) 34%,rgba(15,16,20,.55))"></div>
+<div style="position:absolute;left:14px;top:13px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font:400 17px 'Public Sans',sans-serif;color:#16161a;backdrop-filter:blur(8px)">‹</div>
+<div style="position:absolute;left:18px;bottom:14px;font:500 9px ui-monospace,Menlo,monospace;letter-spacing:.08em;color:rgba(255,255,255,.8)">PORTRAIT PLACEHOLDER · 3:4 · CURRENT PHOTOGRAPH</div>
+</div>
+<div style="height:3px;background:linear-gradient(90deg,#2E63E8,#8A6BEF 45%,#F76D8A)"></div>
+<div style="padding:18px 18px 16px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px">
+<div style="font:300 28px/1.15 'Newsreader',Georgia,serif;color:#16161a">Arjun R.</div>
+<div style="font:600 16px ui-monospace,Menlo,monospace;color:#16161a">₹499<span style="font:500 10px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">/HR</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:13px">
+<span style="font:600 11px ui-monospace,Menlo,monospace;color:#16161a">4.8</span><span style="font:400 11.5px 'Public Sans',sans-serif;color:rgba(22,22,26,.55)">· 23 verified reviews · 31 hours booked</span>
+</div>
+<div style="font:400 14px/1.55 'Public Sans',sans-serif;color:rgba(22,22,26,.7)">Quiet company, and comfortable with silence. I know the galleries around MG Road and most of the coffee in between. Happy to sit through a film without talking over it.</div>
+</div>
+<div style="padding:16px 18px;background:#fbfaf7;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div><div style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:rgba(22,22,26,.45);margin-bottom:5px">AREAS HE COVERS</div><div style="font:600 13px 'Public Sans',sans-serif;color:#16161a">Cubbon Park, MG Road</div></div>
+<div><div style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:rgba(22,22,26,.45);margin-bottom:5px">USUAL HOURS</div><div style="font:600 13px 'Public Sans',sans-serif;color:#16161a">Wed–Sun, 2–10pm</div></div>
+</div>
+</div>
+<div style="padding:16px 18px;background:#FDEFF3;border-bottom:1px solid rgba(232,85,122,.18)">
+<div style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:#C7456B;margin-bottom:6px">BEFORE YOU BOOK HIM</div>
+<div style="font:400 12.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.7)">Public places only. Nothing romantic or sexual is offered or permitted, and he may end the booking immediately for a breach, with no refund. We do not describe him as verified or background-checked.</div>
+</div>
+<div style="padding:18px 18px 16px;background:#fff">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+<span style="font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(22,22,26,.45)">REVIEWS FROM COMPLETED BOOKINGS</span>
+<span style="font:600 9.5px ui-monospace,Menlo,monospace;color:#2E63E8">ALL 23</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:13px">
+<div style="border-left:2px solid #2E63E8;padding-left:12px">
+<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px"><span style="font:600 12px 'Public Sans',sans-serif;color:#16161a">A.</span><span style="font:600 10px ui-monospace,Menlo,monospace;color:#16161a">5.0</span><span style="font:500 9.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">CUBBON PARK · JUL 2026</span></div>
+<div style="font:400 13px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.68)">Turned up on time, stayed exactly the hour, no awkwardness. I went to the exhibition I had been putting off since April.</div>
+</div>
+<div style="border-left:2px solid rgba(22,22,26,.15);padding-left:12px">
+<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px"><span style="font:600 12px 'Public Sans',sans-serif;color:#16161a">S.</span><span style="font:600 10px ui-monospace,Menlo,monospace;color:#16161a">4.0</span><span style="font:500 9.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">MG ROAD · JUN 2026</span></div>
+<div style="font:400 13px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.68)">Fine, and easy to talk to. Conversation ran out near the end, which was honestly still better than going alone.</div>
+</div>
+</div>
+</div>
+<div style="padding:13px 18px 16px;background:#fff;border-top:1px solid rgba(22,22,26,.09);box-shadow:0 -6px 18px rgba(22,22,26,.06)">
+<div style="position:relative;overflow:hidden;height:52px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#2E63E8,#F76D8A);border-radius:8px;box-shadow:0 8px 20px rgba(46,99,232,.24)">
+<span style="font:600 15px 'Public Sans',sans-serif;color:#fff;position:relative;z-index:1">Check his availability</span>
+<span style="position:absolute;top:0;bottom:0;width:38%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.3),rgba(255,255,255,0));animation:acSheen 4.4s ease-in-out infinite"></span>
+</div>
+<div style="text-align:center;font:400 11.5px 'Public Sans',sans-serif;color:rgba(22,22,26,.5);margin-top:8px">Nothing is charged until you accept the terms and pay.</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 11.5px 'Public Sans',sans-serif;color:rgba(0,0,0,.6)">04 · SLOT PICKER</div>
+<div style="width:375px;background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.09);overflow:hidden">
+<div style="height:34px;display:flex;align-items:center;justify-content:center;background:#ecebe6;border-bottom:1px solid rgba(22,22,26,.08);font:500 11px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">alongco.com/c/arjun-r/slots</div>
+<div style="height:3px;background:linear-gradient(90deg,#2E63E8,#8A6BEF 45%,#F76D8A)"></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<span style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(22,22,26,.14);display:flex;align-items:center;justify-content:center;font:400 16px 'Public Sans',sans-serif;color:#16161a">‹</span>
+<div><div style="font:600 14px 'Public Sans',sans-serif;color:#16161a">Arjun R.</div><div style="font:500 10px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">₹499/HR · CUBBON PARK, MG ROAD</div></div>
+</div>
+<div style="padding:18px 18px 14px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="font:300 24px/1.2 'Newsreader',Georgia,serif;color:#16161a;margin-bottom:5px">Pick a day and a time</div>
+<div style="font:400 12.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.6)">Times already taken stay on screen, greyed out. Service hours 8am to 10pm, seven days ahead.</div>
+</div>
+<div style="padding:14px 18px;background:#fbfaf7;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:rgba(22,22,26,.45);margin-bottom:10px">AUGUST 2026</div>
+<div style="display:flex;gap:6px">
+<div style="flex:1;text-align:center;padding:9px 0;border-radius:8px;background:#fff;border:1px solid rgba(22,22,26,.1)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">THU</div><div style="font:600 15px 'Public Sans',sans-serif;color:#16161a;margin-top:2px">6</div><div style="width:4px;height:4px;border-radius:50%;background:#2E63E8;margin:4px auto 0"></div></div>
+<div style="flex:1;text-align:center;padding:9px 0;border-radius:8px;background:#fff;border:1px solid rgba(22,22,26,.1)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">FRI</div><div style="font:600 15px 'Public Sans',sans-serif;color:#16161a;margin-top:2px">7</div><div style="width:4px;height:4px;border-radius:50%;background:#2E63E8;margin:4px auto 0"></div></div>
+<div style="flex:1;text-align:center;padding:9px 0;border-radius:8px;background:#16161a"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(255,255,255,.55)">SAT</div><div style="font:600 15px 'Public Sans',sans-serif;color:#fff;margin-top:2px">8</div><div style="width:4px;height:4px;border-radius:50%;background:#F98CA2;margin:4px auto 0"></div></div>
+<div style="flex:1;text-align:center;padding:9px 0;border-radius:8px;background:#fff;border:1px solid rgba(22,22,26,.1)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">SUN</div><div style="font:600 15px 'Public Sans',sans-serif;color:#16161a;margin-top:2px">9</div><div style="width:4px;height:4px;border-radius:50%;background:#2E63E8;margin:4px auto 0"></div></div>
+<div style="flex:1;text-align:center;padding:9px 0;border-radius:8px;background:#F5F4F0;border:1px solid rgba(22,22,26,.06)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.25)">MON</div><div style="font:600 15px 'Public Sans',sans-serif;color:rgba(22,22,26,.28);margin-top:2px">10</div><div style="font:500 7px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.3);margin-top:4px">FULL</div></div>
+<div style="flex:1;text-align:center;padding:9px 0;border-radius:8px;background:#fff;border:1px solid rgba(22,22,26,.1)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">TUE</div><div style="font:600 15px 'Public Sans',sans-serif;color:#16161a;margin-top:2px">11</div><div style="width:4px;height:4px;border-radius:50%;background:#2E63E8;margin:4px auto 0"></div></div>
+</div>
+</div>
+<div style="padding:16px 18px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+<span style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:rgba(22,22,26,.45)">SATURDAY 8 AUGUST</span>
+<span style="font:500 9px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">5 OF 9 FREE</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+<span style="text-align:center;font:600 12px ui-monospace,Menlo,monospace;color:#2E4FA8;background:#EDF1FD;border:1px solid rgba(46,99,232,.2);border-radius:7px;padding:11px 0">2:00 PM</span>
+<span style="text-align:center;font:600 12px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.28);background:#F5F4F0;border:1px solid rgba(22,22,26,.07);border-radius:7px;padding:11px 0;text-decoration:line-through">3:00 PM</span>
+<span style="position:relative;text-align:center;font:600 12px ui-monospace,Menlo,monospace;color:#fff;background:#16161a;border:1px solid #16161a;border-radius:7px;padding:11px 0;box-shadow:0 4px 12px rgba(22,22,26,.2)">4:00 PM</span>
+<span style="text-align:center;font:600 12px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.28);background:#F5F4F0;border:1px solid rgba(22,22,26,.07);border-radius:7px;padding:11px 0;text-decoration:line-through">5:00 PM</span>
+<span style="text-align:center;font:600 12px ui-monospace,Menlo,monospace;color:#2E4FA8;background:#EDF1FD;border:1px solid rgba(46,99,232,.2);border-radius:7px;padding:11px 0">6:00 PM</span>
+<span style="text-align:center;font:600 12px ui-monospace,Menlo,monospace;color:#2E4FA8;background:#EDF1FD;border:1px solid rgba(46,99,232,.2);border-radius:7px;padding:11px 0">7:00 PM</span>
+<span style="text-align:center;font:600 12px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.28);background:#F5F4F0;border:1px solid rgba(22,22,26,.07);border-radius:7px;padding:11px 0;text-decoration:line-through">8:00 PM</span>
+<span style="text-align:center;font:600 12px ui-monospace,Menlo,monospace;color:#2E4FA8;background:#EDF1FD;border:1px solid rgba(46,99,232,.2);border-radius:7px;padding:11px 0">9:00 PM</span>
+<span style="text-align:center;font:600 12px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.28);background:#F5F4F0;border:1px solid rgba(22,22,26,.07);border-radius:7px;padding:11px 0">—</span>
+</div>
+<div style="display:flex;gap:14px;margin-top:12px">
+<span style="display:flex;align-items:center;gap:5px;font:500 9.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.5)"><span style="width:9px;height:9px;border-radius:2px;background:#EDF1FD;border:1px solid rgba(46,99,232,.3)"></span>FREE</span>
+<span style="display:flex;align-items:center;gap:5px;font:500 9.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.5)"><span style="width:9px;height:9px;border-radius:2px;background:#16161a"></span>CHOSEN</span>
+<span style="display:flex;align-items:center;gap:5px;font:500 9.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.5)"><span style="width:9px;height:9px;border-radius:2px;background:#F5F4F0;border:1px solid rgba(22,22,26,.12)"></span>TAKEN</span>
+</div>
+</div>
+<div style="padding:16px 18px;background:#EDF1FD;border-bottom:1px solid rgba(46,99,232,.14)">
+<div style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:#2E63E8;margin-bottom:10px">HOW LONG</div>
+<div style="display:flex;gap:7px">
+<div style="flex:1;text-align:center;background:#fff;border:1.5px solid #2E63E8;border-radius:8px;padding:10px 0"><div style="font:600 13px 'Public Sans',sans-serif;color:#16161a">1 hour</div><div style="font:600 10px ui-monospace,Menlo,monospace;color:#16161a;margin-top:3px">₹499</div></div>
+<div style="flex:1;text-align:center;background:#fff;border:1px solid rgba(22,22,26,.12);border-radius:8px;padding:10px 0"><div style="font:600 13px 'Public Sans',sans-serif;color:#16161a">2 hours</div><div style="font:600 10px ui-monospace,Menlo,monospace;color:#16161a;margin-top:3px">₹898 <span style="color:#C7456B">−10%</span></div></div>
+<div style="flex:1;text-align:center;background:#fff;border:1px solid rgba(22,22,26,.12);border-radius:8px;padding:10px 0"><div style="font:600 13px 'Public Sans',sans-serif;color:#16161a">3 hours</div><div style="font:600 10px ui-monospace,Menlo,monospace;color:#16161a;margin-top:3px">₹1,048 <span style="color:#C7456B">−30%</span></div></div>
+</div>
+<div style="font:400 11.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.55);margin-top:9px">No extensions once the hour starts. There is a 15-minute gap after every booking.</div>
+</div>
+<div style="padding:13px 18px 16px;background:#fff;box-shadow:0 -6px 18px rgba(22,22,26,.06)">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px">
+<div><div style="font:600 13.5px 'Public Sans',sans-serif;color:#16161a">Sat 8 Aug, 4:00–5:00 pm</div><div style="font:500 10px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45);margin-top:2px">CUBBON PARK · 1 HOUR</div></div>
+<div style="font:600 19px ui-monospace,Menlo,monospace;color:#16161a">₹499</div>
+</div>
+<div style="height:52px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#2E63E8,#F76D8A);border-radius:8px;font:600 15px 'Public Sans',sans-serif;color:#fff;box-shadow:0 8px 20px rgba(46,99,232,.24)">Continue</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 11.5px 'Public Sans',sans-serif;color:rgba(0,0,0,.6)">05 · YOUR DETAILS</div>
+<div style="width:375px;background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.09);overflow:hidden">
+<div style="height:34px;display:flex;align-items:center;justify-content:center;background:#ecebe6;border-bottom:1px solid rgba(22,22,26,.08);font:500 11px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">alongco.com/book/details</div>
+<div style="height:3px;background:linear-gradient(90deg,#2E63E8,#8A6BEF 45%,#F76D8A)"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#FBF2DC;border-bottom:1px solid rgba(138,106,34,.2)">
+<span style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8A6A22">SLOT HELD FOR YOU</span>
+<span style="font:600 12px ui-monospace,Menlo,monospace;color:#8A6A22">09:41</span>
+</div>
+<div style="padding:18px 18px 14px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="font:300 24px/1.2 'Newsreader',Georgia,serif;color:#16161a;margin-bottom:5px">Three things, and nothing else</div>
+<div style="font:400 12.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.6)">We ask for the minimum the booking needs. No email, no address, no photo.</div>
+</div>
+<div style="padding:16px 18px 18px;background:#fff;display:flex;flex-direction:column;gap:17px">
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px"><span style="font:600 11px 'Public Sans',sans-serif;letter-spacing:.02em;color:#16161a">Phone number</span><span style="font:600 9px ui-monospace,Menlo,monospace;color:#1F7A5A;background:#E8F5EF;border-radius:3px;padding:3px 6px">VERIFIED</span></div>
+<div style="height:48px;border:1px solid rgba(22,22,26,.14);border-radius:8px;display:flex;align-items:center;padding:0 13px;font:500 14.5px ui-monospace,Menlo,monospace;color:#16161a;background:#FBFAF7">+91 98xxx xxxxx</div>
+<div style="font:400 11.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.5);margin-top:5px">How we send your confirmation on WhatsApp, and how we reach you if something changes.</div>
+</div>
+<div>
+<div style="font:600 11px 'Public Sans',sans-serif;color:#16161a;margin-bottom:6px">Your full name</div>
+<div style="height:48px;border:1.5px solid #2E63E8;border-radius:8px;display:flex;align-items:center;padding:0 13px;font:400 14.5px 'Public Sans',sans-serif;color:#16161a;background:#fff;box-shadow:0 0 0 3px rgba(46,99,232,.1)">Ananya Rao<span style="width:1px;height:19px;background:#2E63E8;margin-left:2px"></span></div>
+<div style="font:400 11.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.5);margin-top:5px">Your companion is told your first name only. The rest stays with us.</div>
+</div>
+<div>
+<div style="font:600 11px 'Public Sans',sans-serif;color:#16161a;margin-bottom:6px">Where you want to meet</div>
+<div style="display:flex;gap:6px">
+<span style="flex:1;text-align:center;font:600 10.5px ui-monospace,Menlo,monospace;color:#fff;background:#16161a;border-radius:7px;padding:11px 0">CUBBON PARK</span>
+<span style="flex:1;text-align:center;font:600 10.5px ui-monospace,Menlo,monospace;color:#2E4FA8;background:#EDF1FD;border:1px solid rgba(46,99,232,.18);border-radius:7px;padding:11px 0">MG ROAD</span>
+<span style="flex:1;text-align:center;font:600 10.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.28);background:#F5F4F0;border:1px solid rgba(22,22,26,.07);border-radius:7px;padding:11px 0">INDIRANAGAR</span>
+</div>
+<div style="font:400 11.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.5);margin-top:5px">He covers Cubbon Park and MG Road. You pick the exact place over WhatsApp.</div>
+</div>
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px"><span style="font:600 11px 'Public Sans',sans-serif;color:#16161a">Anything he should know</span><span style="font:500 10px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.4)">OPTIONAL</span></div>
+<div style="min-height:62px;border:1px solid rgba(22,22,26,.14);border-radius:8px;padding:11px 13px;font:400 13.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.38);background:#fff">I'd rather not talk much — I want to see the exhibition.</div>
+</div>
+<div style="display:flex;gap:10px;background:#EDF1FD;border-radius:8px;padding:12px 13px">
+<span style="width:16px;height:16px;border-radius:4px;background:#2E63E8;flex:none;color:#fff;font:700 10px 'Public Sans',sans-serif;display:flex;align-items:center;justify-content:center;margin-top:1px">✓</span>
+<span style="font:400 11.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.7)">I agree to AlongCo holding my phone number, name and chosen area to arrange this booking, kept for 24 months and deleted on request. <a href="#details">Privacy notice</a></span>
+</div>
+<div style="height:52px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#2E63E8,#F76D8A);border-radius:8px;font:600 15px 'Public Sans',sans-serif;color:#fff;box-shadow:0 8px 20px rgba(46,99,232,.24)">Review and pay · ₹499</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 11.5px 'Public Sans',sans-serif;color:rgba(0,0,0,.6)">06 · CHECKOUT</div>
+<div style="width:375px;background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.09);overflow:hidden">
+<div style="height:34px;display:flex;align-items:center;justify-content:center;background:#ecebe6;border-bottom:1px solid rgba(22,22,26,.08);font:500 11px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">alongco.com/book/pay</div>
+<div style="height:3px;background:linear-gradient(90deg,#2E63E8,#8A6BEF 45%,#F76D8A)"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#FBF2DC;border-bottom:1px solid rgba(138,106,34,.2)">
+<span style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#8A6A22">SLOT HELD FOR YOU</span>
+<span style="font:600 12px ui-monospace,Menlo,monospace;color:#8A6A22">07:12</span>
+</div>
+<div style="padding:18px 18px 16px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="font:300 24px/1.2 'Newsreader',Georgia,serif;color:#16161a;margin-bottom:14px">What you are paying for</div>
+<div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+<div style="position:relative;width:52px;height:52px;flex:none;border-radius:7px;overflow:hidden;background:#dfe6f8"><div style="position:absolute;inset:0;background:repeating-linear-gradient(128deg,rgba(46,99,232,.14) 0 7px,rgba(46,99,232,0) 7px 14px)"></div></div>
+<div><div style="font:600 14.5px 'Public Sans',sans-serif;color:#16161a">Arjun R.</div><div style="font:500 10.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.5);margin-top:3px">SAT 8 AUG · 4:00–5:00 PM · CUBBON PARK</div></div>
+</div>
+<div style="border-top:1px solid rgba(22,22,26,.08)">
+<div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(22,22,26,.06)"><span style="font:400 13.5px 'Public Sans',sans-serif;color:rgba(22,22,26,.7)">One hour at ₹499</span><span style="font:600 13.5px ui-monospace,Menlo,monospace;color:#16161a">₹499.00</span></div>
+<div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(22,22,26,.06)"><span style="font:400 13.5px 'Public Sans',sans-serif;color:rgba(22,22,26,.7)">Duration discount</span><span style="font:600 13.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">—</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:13px 0 0"><span style="font:600 14px 'Public Sans',sans-serif;color:#16161a">Total due now</span><span style="font:700 22px ui-monospace,Menlo,monospace;color:#16161a">₹499.00</span></div>
+</div>
+</div>
+<div style="padding:16px 18px;background:#FDEFF3;border-bottom:1px solid rgba(232,85,122,.2)">
+<div style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:#C7456B;margin-bottom:11px">THE TERMS OF THIS BOOKING</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-bottom:13px">
+<div style="display:flex;gap:9px;font:400 12.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.78)"><span style="width:5px;height:5px;background:#E8557A;flex:none;margin-top:6px"></span><span>You meet in a public place. Not a home, not a hotel, not a car.</span></div>
+<div style="display:flex;gap:9px;font:400 12.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.78)"><span style="width:5px;height:5px;background:#E8557A;flex:none;margin-top:6px"></span><span>Nothing romantic or sexual is offered or permitted, at any price.</span></div>
+<div style="display:flex;gap:9px;font:400 12.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.78)"><span style="width:5px;height:5px;background:#E8557A;flex:none;margin-top:6px"></span><span>Your companion may end the booking immediately for a breach of these terms, with no refund.</span></div>
+<div style="display:flex;gap:9px;font:400 12.5px/1.45 'Public Sans',sans-serif;color:rgba(22,22,26,.78)"><span style="width:5px;height:5px;background:#E8557A;flex:none;margin-top:6px"></span><span>Cancel more than 48h ahead for a full refund; 24–48h for 50%; nothing inside 24h. You will see the amount before you confirm.</span></div>
+</div>
+<div style="display:flex;gap:10px;background:#fff;border:1px solid rgba(232,85,122,.28);border-radius:8px;padding:12px 13px">
+<span style="width:18px;height:18px;border-radius:4px;background:#16161a;flex:none;color:#fff;font:700 11px 'Public Sans',sans-serif;display:flex;align-items:center;justify-content:center;margin-top:1px">✓</span>
+<span style="font:500 12.5px/1.45 'Public Sans',sans-serif;color:#16161a">I have read these terms and I accept them.</span>
+</div>
+</div>
+<div style="padding:16px 18px 18px;background:#fff">
+<div style="height:54px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#2E63E8,#F76D8A);border-radius:8px;font:600 15.5px 'Public Sans',sans-serif;color:#fff;box-shadow:0 8px 22px rgba(46,99,232,.26);margin-bottom:10px">Pay ₹499 and book</div>
+<div style="text-align:center;font:500 10px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45);margin-bottom:14px">CASHFREE · UPI, CARD, NETBANKING</div>
+<div style="border-top:1px solid rgba(22,22,26,.08);padding-top:12px;font:400 11.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.55)">Your booking is confirmed by our payment provider, not by this page. If your connection drops after paying, the ticket still appears in your bookings. Trouble? <span style="font:500 11.5px ui-monospace,Menlo,monospace;color:#16161a">+91 80 4xxx xxxx</span></div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 11.5px 'Public Sans',sans-serif;color:rgba(0,0,0,.6)">07 · TICKET — issued on confirmation, prints on load</div>
+<div style="width:375px;background:#101116;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.16);overflow:hidden;position:relative">
+<div style="height:34px;display:flex;align-items:center;justify-content:center;background:#ecebe6;border-bottom:1px solid rgba(22,22,26,.08);font:500 11px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45);letter-spacing:.03em">alongco.com/t/AC-7F3K2M</div>
+
+<div style="position:relative;overflow:hidden;background:#101116">
+<div style="position:absolute;width:320px;height:320px;left:-120px;top:-120px;border-radius:50%;background:radial-gradient(circle,rgba(46,99,232,.4),rgba(46,99,232,0) 66%);filter:blur(30px);animation:acDrift 18s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:absolute;width:300px;height:300px;right:-120px;bottom:60px;border-radius:50%;background:radial-gradient(circle,rgba(247,109,138,.34),rgba(247,109,138,0) 66%);filter:blur(30px);animation:acDrift2 21s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:absolute;inset:0;background-image:url(assets/grain.png);background-size:180px 180px;opacity:.45;pointer-events:none"></div>
+
+<div style="position:relative;padding:18px 20px 8px">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+<div style="display:flex;align-items:center;gap:9px">
+<img src="assets/mark.png" alt="" style="width:24px;height:24px;display:block" />
+<span style="font:600 11.5px 'Public Sans',sans-serif;letter-spacing:.18em;color:#fff">ALONG CO</span>
+</div>
+<span style="font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#5FD3A3;background:rgba(95,211,163,.12);border:1px solid rgba(95,211,163,.3);border-radius:20px;padding:5px 9px">PAYMENT CAPTURED</span>
+</div>
+<div style="font:300 25px/1.2 'Newsreader',Georgia,serif;color:#fff;margin-bottom:6px;animation:acFadeIn .8s ease-out both">Your hour is booked.</div>
+<div style="font:400 13px/1.5 'Public Sans',sans-serif;color:rgba(255,255,255,.55);margin-bottom:6px;animation:acFadeIn .8s ease-out .1s both">Keep this ticket. We will message you on WhatsApp within fifteen minutes with the meeting details.</div>
+</div>
+
+<div style="position:relative;height:22px;margin:0 20px">
+<div style="position:absolute;left:0;right:0;top:10px;height:9px;background:#05060a;border-radius:2px;box-shadow:inset 0 2px 4px rgba(0,0,0,.9)"></div>
+</div>
+
+<div style="position:relative;margin:0 20px 22px;overflow:hidden">
+<div style="position:relative;animation:acPrint 1.7s steps(22,end) .35s both">
+
+<div style="display:flex;justify-content:space-between;padding:0 4px;position:relative;z-index:2;height:6px">
+<span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116;margin-top:-4px"></span>
+</div>
+
+<div style="position:relative;margin-top:-6px;background:#FCFAF3;box-shadow:0 14px 34px rgba(0,0,0,.45);overflow:hidden">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(22,22,26,.028) 0 1px,rgba(22,22,26,0) 1px 3px);pointer-events:none"></div>
+<div style="position:absolute;inset:0;background-image:url(assets/grain.png);background-size:180px 180px;opacity:.35;mix-blend-mode:multiply;pointer-events:none"></div>
+<div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(22,22,26,.07),rgba(22,22,26,0) 9%,rgba(22,22,26,0) 91%,rgba(22,22,26,.07));pointer-events:none"></div>
+<div style="height:5px;background:linear-gradient(90deg,#2E63E8,#8A6BEF 50%,#F76D8A);position:relative;z-index:1"></div>
+
+<div style="position:relative;z-index:1;padding:14px 16px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+<div>
+<div style="font:600 8.5px ui-monospace,Menlo,monospace;letter-spacing:.16em;color:rgba(35,35,31,.5);margin-bottom:5px">ALONGCO · BOOKING TICKET</div>
+<div style="font:700 22px ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#23231f;text-shadow:0 0 .6px rgba(35,35,31,.5)">AC-7F3K2M</div>
+<div style="font:500 9px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(35,35,31,.5);margin-top:5px">ISSUED 06 AUG 2026 · 21:34 IST</div>
+</div>
+<img src="assets/qr-placeholder.png" alt="" style="width:66px;height:66px;display:block;flex:none;image-rendering:pixelated;opacity:.92" />
+</div>
+
+<div style="position:relative;z-index:1;padding:0 16px 12px;font:500 9px ui-monospace,Menlo,monospace;letter-spacing:.08em;color:rgba(35,35,31,.5)">SHOW THIS CODE WHEN YOU MEET · HIS REAL NAME IS NEVER SHOWN</div>
+
+<div style="position:relative;height:15px;z-index:1">
+<div style="position:absolute;left:0;right:0;top:7px;border-top:1px dashed rgba(35,35,31,.35)"></div>
+<div style="position:absolute;left:-8px;top:0;width:15px;height:15px;border-radius:50%;background:#101116"></div>
+<div style="position:absolute;right:-8px;top:0;width:15px;height:15px;border-radius:50%;background:#101116"></div>
+</div>
+
+<div style="position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr">
+<div style="padding:12px 16px;border-right:1px dotted rgba(35,35,31,.22);border-bottom:1px dotted rgba(35,35,31,.22)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(35,35,31,.5);margin-bottom:4px">COMPANION</div><div style="font:600 14px 'Public Sans',sans-serif;color:#23231f">Arjun R.</div></div>
+<div style="padding:12px 16px;border-bottom:1px dotted rgba(35,35,31,.22)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(35,35,31,.5);margin-bottom:4px">DURATION</div><div style="font:600 14px 'Public Sans',sans-serif;color:#23231f">1 hour · no extension</div></div>
+<div style="padding:12px 16px;border-right:1px dotted rgba(35,35,31,.22);border-bottom:1px dotted rgba(35,35,31,.22)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(35,35,31,.5);margin-bottom:4px">DATE</div><div style="font:600 14px 'Public Sans',sans-serif;color:#23231f">Sat 8 Aug 2026</div></div>
+<div style="padding:12px 16px;border-bottom:1px dotted rgba(35,35,31,.22)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(35,35,31,.5);margin-bottom:4px">TIME</div><div style="font:600 14px 'Public Sans',sans-serif;color:#23231f">4:00 – 5:00 pm</div></div>
+<div style="padding:12px 16px;border-right:1px dotted rgba(35,35,31,.22);border-bottom:1px dotted rgba(35,35,31,.22)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(35,35,31,.5);margin-bottom:4px">AREA</div><div style="font:600 14px 'Public Sans',sans-serif;color:#23231f">Cubbon Park</div></div>
+<div style="padding:12px 16px;border-bottom:1px dotted rgba(35,35,31,.22)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(35,35,31,.5);margin-bottom:4px">BOOKED BY</div><div style="font:600 14px 'Public Sans',sans-serif;color:#23231f">Ananya</div></div>
+</div>
+
+<div style="position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:space-between;padding:13px 16px 12px;border-bottom:1px dotted rgba(35,35,31,.22)">
+<div>
+<div style="font:600 8.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(35,35,31,.5);margin-bottom:4px">AMOUNT PAID</div>
+<div style="font:700 24px ui-monospace,Menlo,monospace;color:#23231f;text-shadow:0 0 .6px rgba(35,35,31,.45)">₹499.00</div>
+</div>
+<div style="text-align:right">
+<div style="font:500 9px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(35,35,31,.5)">UPI · CASHFREE</div>
+<div style="font:500 9px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(35,35,31,.5);margin-top:3px">TERMS v1.2 ACCEPTED</div>
+</div>
+</div>
+
+<div style="position:relative;z-index:1;padding:12px 16px 10px">
+<div style="font:600 8.5px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:rgba(35,35,31,.5);margin-bottom:6px">CONDUCT — AGREED AT CHECKOUT</div>
+<div style="font:400 10.5px/1.5 'Public Sans',sans-serif;color:rgba(35,35,31,.72)">Public places only. No romantic or sexual conduct is offered or permitted. Your companion may end this booking immediately for a breach, with no refund. Cancel 48h ahead for a full refund, 24–48h for 50%, none inside 24h. Companions are men, listed under a pseudonym.</div>
+</div>
+
+<sc-if value="{{ showStamp }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;right:12px;bottom:138px;z-index:2;border:2px solid rgba(200,66,96,.65);border-radius:4px;padding:5px 9px;transform:rotate(-9deg);animation:acStamp 2.6s ease-out .35s both;pointer-events:none"><div style="font:700 13px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:rgba(200,66,96,.72)">PAID</div><div style="font:600 7.5px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(200,66,96,.62);text-align:center;margin-top:1px">06.08.26</div></div></sc-if>
+
+<div style="position:relative;z-index:1;padding:0 16px 14px">
+<img src="assets/barcode.png" alt="" style="width:100%;height:38px;display:block;opacity:.88;mix-blend-mode:multiply" />
+<div style="display:flex;justify-content:space-between;margin-top:5px"><span style="font:500 9px ui-monospace,Menlo,monospace;letter-spacing:.22em;color:rgba(35,35,31,.6)">AC7F3K2M0806</span><span style="font:500 9px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(35,35,31,.45)">alongco.com</span></div>
+</div>
+</div>
+
+<div style="display:flex;justify-content:space-between;padding:0 4px;position:relative;z-index:2;margin-top:-5px">
+<span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span><span style="width:9px;height:9px;border-radius:50%;background:#101116"></span>
+</div>
+
+<div style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,rgba(95,211,163,0),rgba(95,211,163,.8),rgba(95,211,163,0));animation:acHead 1.7s steps(22,end) .35s both;pointer-events:none"></div>
+</div>
+</div>
+
+<div style="position:relative;padding:0 20px 24px">
+<div style="display:flex;gap:9px;margin-bottom:12px">
+<div style="flex:1;height:50px;display:flex;align-items:center;justify-content:center;background:#fff;color:#16161a;border-radius:8px;font:600 14px 'Public Sans',sans-serif">Save as PDF</div>
+<div style="flex:1;height:50px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:8px;font:600 14px 'Public Sans',sans-serif;background:rgba(255,255,255,.05)">Save image</div>
+</div>
+<div style="border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:13px 14px;background:rgba(255,255,255,.04)">
+<div style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.13em;color:#F98CA2;margin-bottom:7px">IF SOMETHING GOES WRONG</div>
+<div style="font:400 12.5px/1.5 'Public Sans',sans-serif;color:rgba(255,255,255,.68);margin-bottom:9px">Call us during service hours and we will step in — including ending the booking on your side.</div>
+<div style="display:flex;align-items:center;gap:8px"><span style="font:600 14px ui-monospace,Menlo,monospace;color:#fff">+91 80 4xxx xxxx</span><span style="font:500 10px ui-monospace,Menlo,monospace;color:rgba(255,255,255,.45)">8AM–10PM IST</span></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:16px"><a href="#ticket" style="color:#9DB4F6;font:400 12.5px 'Public Sans',sans-serif">Cancel this booking</a><a href="#ticket" style="color:#9DB4F6;font:400 12.5px 'Public Sans',sans-serif">Refund policy</a><a href="#ticket" style="color:#9DB4F6;font:400 12.5px 'Public Sans',sans-serif">Conduct policy</a></div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 11.5px 'Public Sans',sans-serif;color:rgba(0,0,0,.6)">08 · STATES</div>
+<div style="display:flex;flex-direction:column;gap:16px;width:375px">
+
+<div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.08);overflow:hidden">
+<div style="padding:9px 14px;background:#16161a;font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:#9DB4F6">A · DAY FULLY BOOKED</div>
+<div style="padding:20px 18px;background:#fff">
+<div style="display:flex;gap:6px;margin-bottom:16px">
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:8px;background:#F5F4F0;border:1px solid rgba(22,22,26,.06)"><div style="font:600 8.5px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.25)">MON</div><div style="font:600 14px 'Public Sans',sans-serif;color:rgba(22,22,26,.3);margin-top:2px">10</div></div>
+<div style="flex:3;display:flex;align-items:center;padding-left:12px;font:600 13px 'Public Sans',sans-serif;color:#16161a">Monday 10 August is full</div>
+</div>
+<div style="font:400 13px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.65);margin-bottom:14px">Every hour is taken. His next free slot is <span style="font-weight:600;color:#16161a">Tuesday 11 August at 2:00 pm</span>.</div>
+<div style="display:flex;gap:8px">
+<div style="flex:1;height:46px;display:flex;align-items:center;justify-content:center;background:#16161a;color:#fff;border-radius:8px;font:600 13.5px 'Public Sans',sans-serif">Take Tue 2:00 pm</div>
+<div style="flex:1;height:46px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(46,99,232,.28);color:#2E4FA8;border-radius:8px;font:600 13.5px 'Public Sans',sans-serif">Other companions</div>
+</div>
+</div>
+</div>
+
+<div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.08);overflow:hidden">
+<div style="padding:9px 14px;background:#16161a;font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:#F98CA2">B · PAYMENT FAILED</div>
+<div style="padding:20px 18px;background:#fff">
+<div style="font:300 21px/1.25 'Newsreader',Georgia,serif;color:#16161a;margin-bottom:8px">Your bank declined the payment</div>
+<div style="font:400 13px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.65);margin-bottom:14px">Nothing was charged. Your 4:00 pm slot is still held — <span style="font-weight:600;color:#16161a">4 minutes 38 seconds</span> left. You can try again with the same or another method.</div>
+<div style="height:48px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#2E63E8,#F76D8A);border-radius:8px;font:600 14.5px 'Public Sans',sans-serif;color:#fff;margin-bottom:9px">Try the payment again</div>
+<div style="text-align:center;font:400 11.5px 'Public Sans',sans-serif;color:rgba(22,22,26,.55)">Still failing? Call <span style="font:500 11.5px ui-monospace,Menlo,monospace;color:#16161a">+91 80 4xxx xxxx</span> and we will hold the slot by hand.</div>
+</div>
+</div>
+
+<div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.08);overflow:hidden">
+<div style="padding:9px 14px;background:#16161a;font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:#F0C87A">C · HOLD EXPIRED DURING CHECKOUT</div>
+<div style="padding:20px 18px;background:#fff">
+<div style="font:300 21px/1.25 'Newsreader',Georgia,serif;color:#16161a;margin-bottom:8px">That slot went back on sale</div>
+<div style="font:400 13px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.65);margin-bottom:14px">Holds last ten minutes so nobody else is blocked. You were not charged. Saturday 4:00 pm is still free right now.</div>
+<div style="display:flex;gap:8px">
+<div style="flex:1;height:46px;display:flex;align-items:center;justify-content:center;background:#16161a;color:#fff;border-radius:8px;font:600 13.5px 'Public Sans',sans-serif">Hold 4:00 pm again</div>
+<div style="flex:1;height:46px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(22,22,26,.16);color:#16161a;border-radius:8px;font:600 13.5px 'Public Sans',sans-serif">Pick another time</div>
+</div>
+</div>
+</div>
+
+<div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.08);overflow:hidden">
+<div style="padding:9px 14px;background:#16161a;font:600 9.5px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(255,255,255,.6)">D · NO REVIEWS YET · COMPANION PAUSED</div>
+<div style="padding:20px 18px;background:#fff;display:flex;flex-direction:column;gap:16px">
+<div style="border:1px dashed rgba(22,22,26,.18);border-radius:8px;padding:14px;background:#FBFAF7">
+<div style="font:600 12.5px 'Public Sans',sans-serif;color:#16161a;margin-bottom:5px">No reviews yet</div>
+<div style="font:400 12.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.6)">He has not completed a booking through AlongCo yet, so there is nothing real to show. We would rather show nothing than a rating of zero.</div>
+</div>
+<div style="background:#FBF2DC;border:1px solid rgba(138,106,34,.22);border-radius:8px;padding:14px">
+<div style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:#8A6A22;margin-bottom:6px">NOT TAKING BOOKINGS</div>
+<div style="font:400 12.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.7);margin-bottom:12px">Arjun has paused his availability this week. You can still read his profile.</div>
+<div style="height:44px;display:flex;align-items:center;justify-content:center;background:#F5F4F0;border:1px solid rgba(22,22,26,.1);border-radius:8px;font:600 13.5px 'Public Sans',sans-serif;color:rgba(22,22,26,.35)">Check his availability</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 11.5px 'Public Sans',sans-serif;color:rgba(0,0,0,.6)">09 · POLICY PAGES</div>
+<div style="width:375px;background:#fbfaf7;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 3px 16px rgba(22,22,26,.09);overflow:hidden">
+<div style="height:34px;display:flex;align-items:center;justify-content:center;background:#ecebe6;border-bottom:1px solid rgba(22,22,26,.08);font:500 11px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.45)">alongco.com/policies/conduct</div>
+<div style="height:3px;background:linear-gradient(90deg,#2E63E8,#8A6BEF 45%,#F76D8A)"></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<span style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(22,22,26,.14);display:flex;align-items:center;justify-content:center;font:400 16px 'Public Sans',sans-serif;color:#16161a">‹</span>
+<span style="font:600 13.5px 'Public Sans',sans-serif;color:#16161a">Policies</span>
+</div>
+<div style="display:flex;gap:7px;padding:12px 18px;background:#fbfaf7;border-bottom:1px solid rgba(22,22,26,.09);overflow:hidden">
+<span style="font:600 10px ui-monospace,Menlo,monospace;color:#fff;background:#16161a;border-radius:20px;padding:7px 11px;white-space:nowrap">CONDUCT</span>
+<span style="font:600 10px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.55);background:#fff;border:1px solid rgba(22,22,26,.12);border-radius:20px;padding:7px 11px;white-space:nowrap">REFUNDS</span>
+<span style="font:600 10px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.55);background:#fff;border:1px solid rgba(22,22,26,.12);border-radius:20px;padding:7px 11px;white-space:nowrap">PRIVACY</span>
+<span style="font:600 10px ui-monospace,Menlo,monospace;color:rgba(22,22,26,.55);background:#fff;border:1px solid rgba(22,22,26,.12);border-radius:20px;padding:7px 11px;white-space:nowrap">TERMS</span>
+</div>
+<div style="padding:20px 18px 16px;background:#fff;border-bottom:1px solid rgba(22,22,26,.09)">
+<div style="font:600 9px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:rgba(22,22,26,.45);margin-bottom:8px">VERSION 1.2 · IN FORCE FROM 1 AUG 2026</div>
+<div style="font:300 27px/1.18 'Newsreader',Georgia,serif;color:#16161a;margin-bottom:8px">Conduct policy</div>
+<div style="font:400 13.5px/1.55 'Public Sans',sans-serif;color:rgba(22,22,26,.65)">This is the policy you accept at checkout. It applies to you and to your companion equally, and we enforce it in both directions.</div>
+</div>
+<div style="padding:18px;background:#fff;display:flex;flex-direction:column;gap:18px">
+<div>
+<div style="display:flex;gap:11px;align-items:baseline;margin-bottom:6px"><span style="font:600 10px ui-monospace,Menlo,monospace;color:#2E63E8">1</span><span style="font:600 14.5px 'Public Sans',sans-serif;color:#16161a">Where you meet</span></div>
+<div style="font:400 13.5px/1.6 'Public Sans',sans-serif;color:rgba(22,22,26,.7);padding-left:21px">Bookings take place in public places: cafés, restaurants, cinemas, galleries, parks, shops and streets. Not a private home, not a hotel room, not a parked car. If a booking moves to a private place, it ends there.</div>
+</div>
+<div>
+<div style="display:flex;gap:11px;align-items:baseline;margin-bottom:6px"><span style="font:600 10px ui-monospace,Menlo,monospace;color:#2E63E8">2</span><span style="font:600 14.5px 'Public Sans',sans-serif;color:#16161a">What is not on offer</span></div>
+<div style="font:400 13.5px/1.6 'Public Sans',sans-serif;color:rgba(22,22,26,.7);padding-left:21px">No romantic or sexual conduct of any kind is offered, implied or permitted, at any price. Requests for it are a breach of this policy. Companions do not give out their real names, addresses or personal numbers.</div>
+</div>
+<div style="background:#FDEFF3;border:1px solid rgba(232,85,122,.22);border-radius:8px;padding:14px">
+<div style="display:flex;gap:11px;align-items:baseline;margin-bottom:6px"><span style="font:600 10px ui-monospace,Menlo,monospace;color:#C7456B">3</span><span style="font:600 14.5px 'Public Sans',sans-serif;color:#16161a">Ending a booking early</span></div>
+<div style="font:400 13.5px/1.6 'Public Sans',sans-serif;color:rgba(22,22,26,.72);padding-left:21px">Your companion may end a booking immediately, without discussion, if this policy is breached. No refund is due in that case, and we record the incident. You may end a booking at any time for any reason; whether a refund is due follows the refund policy.</div>
+</div>
+<div>
+<div style="display:flex;gap:11px;align-items:baseline;margin-bottom:6px"><span style="font:600 10px ui-monospace,Menlo,monospace;color:#2E63E8">4</span><span style="font:600 14.5px 'Public Sans',sans-serif;color:#16161a">What we do and do not check</span></div>
+<div style="font:400 13.5px/1.6 'Public Sans',sans-serif;color:rgba(22,22,26,.7);padding-left:21px">Companions sign this policy before being listed and are photographed for their profile. We do not run police or background checks, and we do not describe anyone as verified, screened or background-checked. Reviews marked verified mean only that the reviewer completed a booking.</div>
+</div>
+<div>
+<div style="display:flex;gap:11px;align-items:baseline;margin-bottom:6px"><span style="font:600 10px ui-monospace,Menlo,monospace;color:#2E63E8">5</span><span style="font:600 14.5px 'Public Sans',sans-serif;color:#16161a">Reporting something</span></div>
+<div style="font:400 13.5px/1.6 'Public Sans',sans-serif;color:rgba(22,22,26,.7);padding-left:21px">Call or message us during service hours and we will act the same day. Every report is written into an incident record attached to the booking, whether or not the booking was ended.</div>
+</div>
+<div style="border-top:1px solid rgba(22,22,26,.08);padding-top:14px;display:flex;flex-direction:column;gap:7px">
+<div style="font:400 12.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.6)">Grievance contact, under the Digital Personal Data Protection Act 2023:</div>
+<div style="font:600 13px ui-monospace,Menlo,monospace;color:#16161a">grievance@alongco.com · +91 80 4xxx xxxx</div>
+<div style="font:400 11.5px/1.5 'Public Sans',sans-serif;color:rgba(22,22,26,.5)">Previous versions of this policy are kept and available on request. Bookings are governed by the version accepted at checkout.</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<p style="margin:26px 0 0;font:12px/1.6 'Public Sans',sans-serif;color:rgba(0,0,0,.5)">The complete public app: nine screens in flow order, plus the states that change the outcome. Admin lives in AlongCo Admin.</p>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showFold&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review aids&quot;},&quot;showStamp&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Ticket&quot;}}"></script>
+</body>
+</html>

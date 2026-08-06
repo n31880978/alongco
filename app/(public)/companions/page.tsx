@@ -1,0 +1,146 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { PublicHeader } from '@/components/site/header'
+import { CompanionCard } from '@/components/site/companion-card'
+import { getAvailabilityDigest, listAreas, listCompanions } from '@/lib/companions'
+import { getSettings } from '@/lib/settings'
+import { formatPaise } from '@/lib/booking/pricing'
+import { formatSlotLabel, zonedDateKey } from '@/lib/time/zone'
+import { AreaFilter } from './_components/area-filter'
+import { TrackView } from '@/components/analytics/ga'
+
+export const revalidate = 300
+
+export const metadata: Metadata = {
+  title: 'Companions taking bookings',
+  description:
+    'Men listed under pseudonyms with current photographs, in MG Road, Indiranagar and Cubbon Park.',
+}
+
+export default async function BrowsePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ area?: string; d?: string; t?: string }>
+}) {
+  const params = await searchParams
+  const [companions, areas, settings] = await Promise.all([
+    listCompanions(),
+    listAreas(),
+    getSettings(),
+  ])
+
+  const accepting = companions.filter((c) => c.isAccepting)
+  const digestByCompanion = await Promise.all(
+    accepting.map(async (c) => ({
+      id: c.id,
+      digest: await getAvailabilityDigest([c], {
+        durationMinutes: settings.minDurationMinutes,
+      }),
+    })),
+  )
+
+  const statusFor = (companionId: string) => {
+    const entry = digestByCompanion.find((d) => d.id === companionId)
+    if (!entry) return undefined
+    const today = zonedDateKey(new Date(), settings.timezone)
+
+    for (const day of entry.digest) {
+      const firstFree = day.times.find((t) => t.free)
+      if (!firstFree) continue
+      if (day.date === today) {
+        return {
+          label: `FREE ${formatSlotLabel(new Date(firstFree.value), settings.timezone)
+            .replace(':00', '')
+            .replace(' ', '')}`,
+          tone: 'free' as const,
+        }
+      }
+      return { label: `NEXT: ${day.weekday}`, tone: 'later' as const }
+    }
+    return { label: 'FULL THIS WEEK', tone: 'later' as const }
+  }
+
+  const filtered = params.area
+    ? companions.filter((c) => c.areas.includes(params.area!))
+    : companions
+
+  const cheapest = accepting.length
+    ? Math.min(...accepting.map((c) => c.hourlyRatePaise))
+    : null
+
+  return (
+    <>
+      <TrackView event="view_browse" />
+      <PublicHeader />
+
+      <section className="border-b border-ink/10 bg-white px-[18px] pb-3.5 pt-[18px]">
+        <h1 className="mb-1.5 font-serif text-[25px] font-light leading-[1.2] text-ink">
+          Taking bookings this week
+        </h1>
+        <p className="font-sans text-[13px] leading-[1.5] text-ink/60">
+          {accepting.length === 0
+            ? 'Nobody is open for bookings right now.'
+            : `${spell(accepting.length)} ${accepting.length === 1 ? 'man' : 'men'}, listed under pseudonyms with current photographs.${
+                cheapest ? ` From ${formatPaise(cheapest)} an hour.` : ''
+              }`}
+        </p>
+      </section>
+
+      <AreaFilter areas={areas.map((a) => a.name)} active={params.area ?? null} />
+
+      <section className="flex flex-col gap-3 px-[18px] pb-[18px] pt-3.5">
+        {filtered.length === 0 ? (
+          <EmptyState hasFilter={Boolean(params.area)} />
+        ) : (
+          filtered.map((c) => (
+            <CompanionCard
+              key={c.id}
+              companion={c}
+              status={c.isAccepting ? statusFor(c.id) : undefined}
+            />
+          ))
+        )}
+      </section>
+    </>
+  )
+}
+
+function EmptyState({ hasFilter }: { hasFilter: boolean }) {
+  return (
+    <div className="rounded-lg border border-dashed border-ink/20 bg-paper p-6 text-center">
+      <p className="mb-1.5 font-sans text-[14px] font-semibold text-ink">
+        {hasFilter ? 'Nobody covers that area yet' : 'No companions listed yet'}
+      </p>
+      <p className="font-sans text-[12.5px] leading-[1.5] text-ink/60">
+        {hasFilter
+          ? 'We are adding companions area by area rather than listing men who cannot actually get there.'
+          : 'We would rather show an empty page than pad it. Check back — new profiles go up before their calendars open.'}
+      </p>
+      {hasFilter && (
+        <Link
+          href="/companions"
+          className="mt-3 inline-block font-sans text-[12.5px] font-semibold text-blue"
+        >
+          Show everyone
+        </Link>
+      )}
+    </div>
+  )
+}
+
+function spell(n: number): string {
+  const words = [
+    'No',
+    'One',
+    'Two',
+    'Three',
+    'Four',
+    'Five',
+    'Six',
+    'Seven',
+    'Eight',
+    'Nine',
+    'Ten',
+  ]
+  return words[n] ?? String(n)
+}

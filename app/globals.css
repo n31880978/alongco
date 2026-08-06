@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans;
+  }
+
+  /* Focus visible everywhere. The audience is deciding on safety; keyboard and
+     screen-reader users get the same affordances as everyone else. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-blue ring-offset-2 ring-offset-paper;
+  }
+}
+
+@layer utilities {
+  /* The grain overlay from the design canvas. The canvas referenced
+     assets/grain.png, which was never delivered — this reproduces it as an
+     inline fractal-noise SVG so there is no extra request and no missing asset. */
+  .ac-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-size: 180px 180px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E");
+  }
+
+  /* Ticket stock: warm paper with a horizontal scanline ink texture. */
+  .ac-stock {
+    background-image: repeating-linear-gradient(
+      180deg,
+      rgba(22, 22, 26, 0.028) 0px,
+      rgba(22, 22, 26, 0.028) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+
+  .ac-notch {
+    /* Perforation dots along a tear line. */
+    background-image: radial-gradient(
+      circle at 4px 50%,
+      rgba(22, 22, 26, 0.22) 0 1.6px,
+      transparent 1.7px
+    );
+    background-size: 9px 100%;
+  }
+
+  .ac-scroll-x {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .ac-scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* CLAUDE.md §5 — every one of these is gated. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .ac-no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}
