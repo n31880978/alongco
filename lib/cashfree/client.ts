@@ -11,8 +11,29 @@ export const CASHFREE_API_VERSION = '2025-01-01'
 
 export type CashfreeEnv = 'sandbox' | 'production'
 
+/**
+ * Which Cashfree to talk to.
+ *
+ * Normalised rather than compared raw: a trailing inline comment or stray
+ * whitespace in the env file ("production  # live") would otherwise fail the
+ * equality check and silently keep real customers on the sandbox, where their
+ * payments succeed and no money ever moves. An unrecognised value is refused
+ * outright instead of quietly defaulting — a typo here is a business outage,
+ * not a preference.
+ */
 export function cashfreeEnv(): CashfreeEnv {
-  return process.env.CASHFREE_ENV === 'production' ? 'production' : 'sandbox'
+  const raw = (process.env.CASHFREE_ENV ?? 'sandbox')
+    .split('#')[0]
+    .trim()
+    .toLowerCase()
+
+  if (raw === 'production') return 'production'
+  if (raw === 'sandbox' || raw === '') return 'sandbox'
+
+  throw new CashfreeError(
+    `CASHFREE_ENV must be "sandbox" or "production", not "${raw}"`,
+    500,
+  )
 }
 
 export function cashfreeBaseUrl(): string {
