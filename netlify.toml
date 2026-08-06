@@ -1,0 +1,32 @@
+# AlongCo — Netlify configuration.
+#
+# The @netlify/plugin-nextjs runtime auto-detects the Next.js app and handles
+# routing; nothing here overrides that. This file only:
+#
+#   1. tells the secrets scanner which configured environment variables are
+#      intentionally public, so a correct build does not fail;
+#   2. points at the scheduled functions that replace Vercel Cron — Netlify
+#      does not read vercel.json, so without these the two cron jobs in
+#      CLAUDE.md §8 would simply never run.
+
+[build]
+  functions = "netlify/functions"
+
+[build.environment]
+  # NEXT_PUBLIC_* variables are inlined into the client bundle by Next.js on
+  # purpose — RLS is what actually protects the data, not keeping the anon key
+  # or the Supabase URL out of the browser (CLAUDE.md §7). ADMIN_HOST,
+  # CASHFREE_ENV and ALONGCO_TEST_DB are short, non-sensitive config strings,
+  # not credentials — the scanner was flagging them purely for appearing in
+  # code, docs, and generic library type definitions that happen to contain the
+  # same short word (e.g. "sandbox" inside Node's own .d.ts files).
+  #
+  # Nothing that is an actual credential is on this list. CASHFREE_APP_ID,
+  # CASHFREE_SECRET_KEY, CASHFREE_WEBHOOK_SECRET, CRON_SECRET, DATABASE_URL,
+  # OTP_HASH_SALT and SUPABASE_SERVICE_ROLE_KEY stay scanned.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,NEXT_PUBLIC_SITE_URL,NEXT_PUBLIC_OTP_CHANNEL,NEXT_PUBLIC_SUPPORT_PHONE,NEXT_PUBLIC_GRIEVANCE_EMAIL,ADMIN_HOST,CASHFREE_ENV,ALONGCO_TEST_DB"
+
+# No [[plugins]] block: the build log shows Netlify's zero-config Next.js
+# detection already builds this correctly ("Using Next.js Runtime"). Declaring
+# @netlify/plugin-nextjs explicitly here was untested against this project and
+# unrelated to the actual failure, so it was deliberately left out.
