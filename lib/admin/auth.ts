@@ -1,6 +1,7 @@
 import 'server-only'
 import { cache } from 'react'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import type { AdminRole, AdminUser } from '@/lib/supabase/types'
@@ -40,11 +41,62 @@ export const getCurrentAdmin = cache(async (): Promise<Admin | null> => {
   }
 })
 
-/** Use at the top of every admin page and every admin server action. */
+/**
+ * Use at the top of every admin page and every admin server action.
+ *
+ * Two different failures, treated differently on purpose (CLAUDE.md §9):
+ *
+ *   no session at all  -> the visitor is sent to the admin sign-in page. That
+ *                         page takes an email and password and refuses anyone
+ *                         without an admin_users row, so it is not "a login
+ *                         that would accept her".
+ *   session, not admin -> notFound(). An authenticated customer who reaches an
+ *                         admin URL is REFUSED, not redirected. Bouncing her to
+ *                         a login would both confirm the route exists and
+ *                         invite her to try.
+ */
 export async function requireAdmin(): Promise<Admin> {
   const admin = await getCurrentAdmin()
-  if (!admin) notFound()
-  return admin
+  if (admin) return admin
+
+  const authUserId = await getAuthUserId()
+  if (authUserId) notFound()
+
+  redirect(await adminSignInPath())
+}
+
+/**
+ * Canonical sign-in URL for the host being served.
+ *
+ * On ADMIN_HOST the proxy rewrites bare paths into `/admin/*`, so `/sign-in` is
+ * the address an operator sees and `/admin` never appears. On localhost there is
+ * no second hostname to route on, so the prefix is the switch.
+ */
+export async function adminSignInPath(): Promise<string> {
+  try {
+    const h = await headers()
+    const host = (h.get('host') ?? '').split(':')[0].toLowerCase()
+    const adminHost = (process.env.ADMIN_HOST ?? 'admin.alongco.com')
+      .split(':')[0]
+      .toLowerCase()
+    if (host === adminHost) return '/sign-in'
+  } catch {
+    // No request scope. Fall through to the prefixed path, which resolves on
+    // both hosts even though it is not the pretty one.
+  }
+  return '/admin/sign-in'
+}
+
+async function getAuthUserId(): Promise<string | null> {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    return user?.id ?? null
+  } catch {
+    return null
+  }
 }
 
 /**

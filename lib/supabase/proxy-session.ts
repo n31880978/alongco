@@ -7,9 +7,23 @@ type CookieToSet = { name: string; value: string; options: CookieOptions }
 /**
  * Refreshes the Supabase session cookie on every request so server components
  * never see a stale token. Called from proxy.ts.
+ *
+ * `rewriteTo` exists because the admin host rewrites every bare path into the
+ * `/admin/*` route group. That rewrite has to happen *and* the session has to
+ * refresh, and the response can only be built once — so the rewrite target is
+ * passed in here rather than the caller returning its own response and dropping
+ * the refreshed cookies on the floor.
+ *
+ * Getting this wrong is invisible for about an hour: the access token simply
+ * stops being renewed, and an operator is signed out mid-shift.
  */
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request })
+export async function updateSession(request: NextRequest, rewriteTo?: URL) {
+  const build = () =>
+    rewriteTo
+      ? NextResponse.rewrite(rewriteTo, { request })
+      : NextResponse.next({ request })
+
+  let response = build()
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const publicKey = supabasePublicKey()
@@ -24,7 +38,7 @@ export async function updateSession(request: NextRequest) {
       },
       setAll(cookiesToSet: CookieToSet[]) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        response = NextResponse.next({ request })
+        response = build()
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options),
         )

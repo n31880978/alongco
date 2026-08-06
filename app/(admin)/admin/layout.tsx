@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { GradientRule, Wordmark } from '@/components/brand/mark'
 import { getCurrentAdmin } from '@/lib/admin/auth'
 import { AdminNav } from './_components/admin-nav'
+import { signOutAdmin } from './sign-in/actions'
 
 /**
  * The operations shell. Reachable only through the ADMIN_HOST rewrite in
@@ -25,13 +26,26 @@ export default async function AdminLayout({
           </Link>
           <div className="flex items-center gap-2.5">
             {admin && (
-              <span className="font-mono text-[10px] font-medium uppercase text-ink/45">
+              <span
+                className="font-mono text-[10px] font-medium uppercase text-ink/45"
+                title={admin.email}
+              >
                 {admin.role}
               </span>
             )}
             <span className="rounded-full border border-blue/20 bg-blue-tint px-2.5 py-1 font-mono text-[10px] font-semibold tracking-[0.1em] text-blue-dark">
               ADMIN
             </span>
+            {admin && (
+              <form action={signOutAdmin}>
+                <button
+                  type="submit"
+                  className="rounded-md px-2 py-1 font-sans text-[12px] text-ink/50 hover:bg-paper-sunk hover:text-ink"
+                >
+                  Sign out
+                </button>
+              </form>
+            )}
           </div>
         </div>
         {admin && <AdminNav />}

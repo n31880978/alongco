@@ -30,7 +30,10 @@ export async function proxy(request: NextRequest) {
   if (isAdminHost && !pathname.startsWith('/admin')) {
     const url = request.nextUrl.clone()
     url.pathname = `/admin${pathname === '/' ? '' : pathname}`
-    return NextResponse.rewrite(url, { request })
+    // Rewrite AND refresh. Returning a bare rewrite here would skip the session
+    // refresh on every canonical admin URL, so an operator's token would expire
+    // about an hour into a shift and sign them out.
+    return updateSession(request, url)
   }
 
   // Refreshes the Supabase auth cookie so server components see a live session.

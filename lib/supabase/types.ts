@@ -279,6 +279,13 @@ export type Database = {
         ip_hash: string
         requested_at: string
       }>
+      admin_login_attempts: Table<{
+        id: string
+        email_hash: string
+        ip_hash: string
+        succeeded: boolean
+        attempted_at: string
+      }>
       support_tickets: Table<{
         id: string
         customer_id: string | null
@@ -408,6 +415,18 @@ export type Database = {
         }
       }
       ac_review_publishable: { Args: { p_review_id: string }; Returns: boolean }
+      ac_consume_admin_login_attempt: {
+        Args: { p_email_hash: string; p_ip_hash: string }
+        Returns: {
+          allowed: boolean
+          retry_after_seconds: number
+          scope: string | null
+        }[]
+      }
+      ac_record_admin_login_attempt: {
+        Args: { p_email_hash: string; p_ip_hash: string; p_succeeded: boolean }
+        Returns: undefined
+      }
       ac_check_action_rate_limit: {
         Args: { p_action: string; p_customer_id: string }
         Returns: {
