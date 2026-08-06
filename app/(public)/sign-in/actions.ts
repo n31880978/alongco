@@ -106,7 +106,24 @@ export async function verifyOtp(_prev: OtpState, formData: FormData): Promise<Ot
   const { email, token, next } = parsed.data
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
+  /**
+   * Two token types, because Supabase issues different ones depending on
+   * whether this address has been seen before:
+   *
+   *   'email'  — a returning customer, from the Magic Link template
+   *   'signup' — a first-time address, from the Confirm signup template
+   *
+   * Which one arrives also depends on the project's "Confirm email" setting,
+   * which is a dashboard toggle rather than anything this code controls. Trying
+   * both means a first booking works the same as a tenth, whatever that toggle
+   * is set to — and getting it wrong looks identical to a wrong code, which is
+   * the worst possible thing to be guessing about on the sign-in screen.
+   */
+  const attempt = await supabase.auth.verifyOtp({ email, token, type: 'email' })
+  const { error } = attempt.error
+    ? await supabase.auth.verifyOtp({ email, token, type: 'signup' })
+    : attempt
+
   if (error) {
     return {
       email,
