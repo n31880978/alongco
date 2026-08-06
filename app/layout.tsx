@@ -1,21 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Public_Sans, Newsreader } from 'next/font/google'
 import './globals.css'
-
-const publicSans = Public_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
-  variable: '--font-public-sans',
-  display: 'swap',
-})
-
-// Display headings only (CLAUDE.md §5).
-const newsreader = Newsreader({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  variable: '--font-newsreader',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -42,8 +26,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${publicSans.variable} ${newsreader.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className="bg-paper">
+      <body className="min-h-screen bg-paper font-sans text-ink antialiased">
+        {children}
+      </body>
     </html>
   )
 }
