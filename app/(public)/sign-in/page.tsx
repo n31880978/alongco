@@ -21,13 +21,14 @@ export default async function SignInPage({
   return (
     <>
       <PublicHeader back={{ href: '/companions', label: 'Sign in' }} />
-      <section className="border-b border-ink/10 bg-white px-[18px] pb-3.5 pt-[18px]">
-        <h1 className="mb-1.5 font-serif text-[24px] font-light leading-[1.2] text-ink">
-          Your number, and nothing else
+      <section className="mx-auto w-full max-w-[560px] border-b border-ink/10 bg-white px-[18px] pb-3.5 pt-[18px] md:pt-8">
+        <h1 className="mb-1.5 font-serif text-[24px] font-light leading-[1.2] text-ink md:text-[28px]">
+          Your email, and a six-digit code
         </h1>
         <p className="font-sans text-[12.5px] leading-[1.5] text-ink/60">
-          We send a code on WhatsApp. It is how your confirmation reaches you, and how we
-          reach you if something changes.
+          We send the code to your inbox. Your phone number comes at the next step —
+          that is how your confirmation reaches you on WhatsApp, and how we reach you if
+          something changes.
         </p>
       </section>
       <SignInForm next={next} />

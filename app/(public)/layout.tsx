@@ -9,7 +9,11 @@ import {
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[560px] flex-col bg-paper shadow-none md:max-w-[720px]">
+    /* 375px is the design source (CLAUDE.md §5). The wider ceilings are the
+       "desktop is an adaptation" clause: the column grows to a comfortable
+       reading measure and the pages that can use the extra width — browse,
+       profile, the footer — opt into it themselves. */
+    <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col bg-paper shadow-none md:max-w-[768px] lg:max-w-[1080px]">
       <GradientRule />
       <main className="flex-1">{children}</main>
       <SiteFooter />
@@ -21,18 +25,18 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
 function SiteFooter() {
   return (
-    <footer className="ac-no-print relative overflow-hidden bg-ink px-5 pb-7 pt-7">
+    <footer className="ac-no-print relative overflow-hidden bg-ink px-5 pb-7 pt-7 md:px-8 md:pb-10 md:pt-10">
       <GradientRule className="absolute inset-x-0 top-0" />
       <Mark className="pointer-events-none absolute -bottom-10 -right-16 w-[230px] opacity-[0.16]" />
-      <div className="relative">
+      <div className="relative mx-auto w-full max-w-[880px]">
         <div className="mb-3.5 font-mono text-[9.5px] font-semibold tracking-[0.13em] text-blue-soft">
           CONDUCT, AND WHAT WE DO NOT CLAIM
         </div>
-        <p className="mb-4 max-w-[30ch] font-serif text-[21px] font-light leading-[1.35] text-white">
+        <p className="mb-4 max-w-[30ch] font-serif text-[21px] font-light leading-[1.35] text-white md:text-[26px]">
           You meet in a public place you chose. If anything feels wrong, you can leave.
         </p>
 
-        <div className="mb-4 flex flex-col gap-3">
+        <div className="mb-4 flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-5">
           <p className="border-l-2 border-[#4B7BF5] pl-3 font-sans text-[13.5px] leading-[1.5] text-white/80">
             Companions are men. They are listed under a pseudonym with a current
             photograph, and their real names are never shown.

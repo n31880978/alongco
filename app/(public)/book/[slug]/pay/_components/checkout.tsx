@@ -10,14 +10,24 @@ import { SUPPORT_PHONE, SUPPORT_PHONE_HREF } from '@/lib/contact'
 import { startPayment, type PayState } from '../actions'
 import { cn } from '@/lib/utils'
 
+type RazorpayOptions = {
+  key: string
+  order_id: string
+  amount: number
+  currency: 'INR'
+  name: string
+  description: string
+  prefill: { name?: string; email?: string; contact?: string }
+  notes: Record<string, string>
+  theme: { color: string }
+  retry: { enabled: boolean }
+  handler: (response: Record<string, string>) => void
+  modal: { ondismiss: () => void }
+}
+
 declare global {
   interface Window {
-    Cashfree?: (config: { mode: 'sandbox' | 'production' }) => {
-      checkout: (opts: {
-        paymentSessionId: string
-        redirectTarget?: '_self' | '_blank' | '_modal'
-      }) => Promise<unknown>
-    }
+    Razorpay?: new (options: RazorpayOptions) => { open: () => void }
   }
 }
 
@@ -49,29 +59,53 @@ export function Checkout({
   const [opening, setOpening] = useState(false)
   const [state, submit] = useActionState<PayState, FormData>(startPayment, {})
 
-  const mode = process.env.NEXT_PUBLIC_CASHFREE_ENV === 'production' ? 'production' : 'sandbox'
-
   // The hold lapsed while she was on this screen — show her the real state.
   useEffect(() => {
     if (state.expired) router.refresh()
   }, [state.expired, router])
 
-  // Hand the session to Cashfree once the server has created the order.
+  // Open Razorpay once the server has created the order.
   useEffect(() => {
-    if (!state.paymentSessionId || !sdkReady || opening) return
-    const cashfree = window.Cashfree?.({ mode })
-    if (!cashfree) return
+    const order = state.order
+    if (!order || !sdkReady || opening || !window.Razorpay) return
 
     setOpening(true)
-    void cashfree
-      .checkout({ paymentSessionId: state.paymentSessionId, redirectTarget: '_self' })
-      .catch(() => setOpening(false))
-  }, [state.paymentSessionId, sdkReady, opening, mode])
+
+    const checkout = new window.Razorpay({
+      key: order.keyId,
+      order_id: order.orderId,
+      amount: order.amountPaise,
+      currency: 'INR',
+      name: 'AlongCo',
+      description: `Booking ${order.reference}`,
+      prefill: {
+        name: order.prefillName ?? undefined,
+        email: order.prefillEmail ?? undefined,
+        contact: order.prefillContact ?? undefined,
+      },
+      notes: { booking_reference: order.reference },
+      theme: { color: '#2E63E8' },
+      retry: { enabled: false },
+      // Success here is a UX signal ONLY. It never confirms the booking — the
+      // webhook does that (CLAUDE.md §3.3). So this just sends her to the
+      // return page, which polls for the state the webhook wrote.
+      handler: () => {
+        router.push(`/book/${slug}/pay/return?b=${bookingId}`)
+      },
+      modal: {
+        // She closed the sheet. The hold is still hers and nothing was
+        // charged, so let her try again rather than stranding the button.
+        ondismiss: () => setOpening(false),
+      },
+    })
+
+    checkout.open()
+  }, [state.order, sdkReady, opening, router, slug, bookingId])
 
   return (
     <>
       <Script
-        src="https://sdk.cashfree.com/js/v3/cashfree.js"
+        src="https://checkout.razorpay.com/v1/checkout.js"
         strategy="afterInteractive"
         onLoad={() => setSdkReady(true)}
       />
@@ -134,7 +168,7 @@ export function Checkout({
         </form>
 
         <p className="mb-3.5 mt-2.5 text-center font-mono text-[10px] font-medium text-ink/45">
-          CASHFREE · UPI, CARD, NETBANKING
+          RAZORPAY · UPI, CARD, NETBANKING
         </p>
 
         <p className="border-t border-ink/10 pt-3 font-sans text-[11.5px] leading-[1.5] text-ink/55">

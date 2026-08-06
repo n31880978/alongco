@@ -12,8 +12,9 @@ import { saveDetails, type DetailsState } from '../actions'
 export function DetailsForm({
   slug,
   bookingId,
-  maskedPhone,
+  maskedEmail,
   defaultName,
+  defaultPhone,
   defaultAreaId,
   defaultNotes,
   areas,
@@ -23,8 +24,9 @@ export function DetailsForm({
 }: {
   slug: string
   bookingId: string
-  maskedPhone: string
+  maskedEmail: string
   defaultName: string
+  defaultPhone: string
   defaultAreaId: string
   defaultNotes: string
   areas: { id: string; name: string }[]
@@ -50,14 +52,30 @@ export function DetailsForm({
             </span>
           }
         >
-          Phone number
+          Email
         </FieldLabel>
-        <div className="flex h-12 items-center rounded-lg border border-ink/15 bg-paper px-[13px] font-mono text-[14.5px] font-medium text-ink">
-          {maskedPhone}
+        <div className="flex h-12 items-center rounded-lg border border-ink/15 bg-paper px-[13px] font-sans text-[14.5px] font-medium text-ink">
+          {maskedEmail}
         </div>
+        <FieldHelp>The address you signed in with.</FieldHelp>
+      </div>
+
+      <div>
+        <FieldLabel htmlFor="phone">Your WhatsApp number</FieldLabel>
+        <Input
+          id="phone"
+          name="phone"
+          type="tel"
+          inputMode="numeric"
+          autoComplete="tel"
+          required
+          defaultValue={defaultPhone.replace(/^91/, '')}
+          placeholder="98765 43210"
+          className="font-mono"
+        />
         <FieldHelp>
-          How we send your confirmation on WhatsApp, and how we reach you if something
-          changes.
+          Indian mobile numbers only. This is where we send your confirmation within
+          fifteen minutes, so please check it — a wrong digit means we cannot reach you.
         </FieldHelp>
       </div>
 

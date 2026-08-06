@@ -26,6 +26,11 @@ export type BookingErrorCode =
   | 'AC_BOOKING_NOT_EDITABLE'
   | 'AC_HOLD_EXPIRED'
   | 'AC_INVALID_NAME'
+  | 'AC_NAME_REQUIRED'
+  | 'AC_PHONE_INVALID'
+  | 'AC_PHONE_IN_USE'
+  | 'AC_AREA_INVALID'
+  | 'AC_NOT_EDITABLE'
   | 'AC_NOT_CANCELLABLE'
 
 const MESSAGES: Record<BookingErrorCode, string> = {
@@ -54,6 +59,13 @@ const MESSAGES: Record<BookingErrorCode, string> = {
   AC_HOLD_EXPIRED:
     'Your ten-minute hold ran out, so the slot went back on sale. You were not charged.',
   AC_INVALID_NAME: 'Please enter your full name.',
+  AC_NAME_REQUIRED: 'Please enter your full name.',
+  AC_PHONE_INVALID:
+    'That does not look like an Indian mobile number. We need one that works on WhatsApp, because that is how we confirm.',
+  AC_PHONE_IN_USE:
+    'That number is already on another account. Use the number for this account, or call us and we will sort it out.',
+  AC_AREA_INVALID: 'He does not cover that area. Pick one of the areas listed.',
+  AC_NOT_EDITABLE: 'This booking can no longer be changed here. Please call us.',
   AC_NOT_CANCELLABLE: 'This booking cannot be cancelled from here. Please call us.',
 }
 

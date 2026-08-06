@@ -102,7 +102,11 @@ export function formatPaise(paise: number): string {
   }).format(rupees)
 }
 
-/** Cashfree takes rupees as a decimal number, so convert only at that boundary. */
+/**
+ * Razorpay works in integer paise, so nothing in the payment path needs this.
+ * Kept for any gateway or report that insists on a rupee decimal — convert only
+ * at that boundary, never inside the pricing or refund arithmetic (§3.2).
+ */
 export function paiseToRupees(paise: number): number {
   if (!Number.isInteger(paise)) throw new Error('paise must be an integer')
   return paise / 100

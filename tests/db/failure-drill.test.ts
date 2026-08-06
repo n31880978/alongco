@@ -129,7 +129,7 @@ describe('T24 · expired hold, payment arrives late', () => {
     const { id } = await booking('expired', 30, her, 'AC-LATE03')
 
     await query(
-      `insert into payments (booking_id, cashfree_order_id, amount_paise, status, captured_at)
+      `insert into payments (booking_id, provider_order_id, amount_paise, status, captured_at)
        values ($1,$2,$3,'captured', now())`,
       [id, 'order_AC-LATE03', 49900],
     )

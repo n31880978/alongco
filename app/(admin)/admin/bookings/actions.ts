@@ -4,15 +4,15 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
 import { requireRole, writeAudit } from '@/lib/admin/auth'
-import { createRefund, mapRefundStatus } from '@/lib/cashfree/refunds'
+import { createRefund, mapRefundStatus } from '@/lib/payments/razorpay/refunds'
 import { formatPaise } from '@/lib/booking/pricing'
 
 /**
  * Cancellation, refunds and no-shows. PRD §6.9, TASKS T16 and T17.
  *
  * The database does the arithmetic and the state change in one transaction
- * (ac_admin_cancel_booking); this only carries the result to Cashfree and
- * writes back what Cashfree said. If the network call fails, the refund row
+ * (ac_admin_cancel_booking); this only carries the result to Razorpay and
+ * writes back what Razorpay said. If the network call fails, the refund row
  * survives in a non-success state — a refund we owe and have recorded is
  * recoverable, a refund we issued and did not record is not.
  */
@@ -45,7 +45,9 @@ type CancelResult = {
   refund_id: string | null
   refund_reference: string | null
   incident_id: string | null
-  cashfree_order_id: string | null
+  payment_provider: string | null
+  provider_order_id: string | null
+  provider_payment_id: string | null
 }
 
 const DB_MESSAGES: Record<string, string> = {
@@ -113,7 +115,7 @@ export async function cancelBooking(
   revalidatePath(`/admin/bookings/${bookingId}`)
   revalidatePath('/admin')
 
-  if (!result.refund_id || !result.refund_reference || !result.cashfree_order_id) {
+  if (!result.refund_id || !result.refund_reference || !result.provider_payment_id) {
     return {
       ok: `Booking ${result.to_status.replace(/_/g, ' ')}. No refund is due under ${result.tier_code}.`,
     }
@@ -123,18 +125,18 @@ export async function cancelBooking(
   // Everything past this point is about the provider, and is reported as such —
   // she needs to know whether her money moved (CLAUDE.md §6).
   try {
-    const cf = await createRefund({
-      cashfreeOrderId: result.cashfree_order_id,
+    const refund = await createRefund({
+      providerPaymentId: result.provider_payment_id,
       refundReference: result.refund_reference,
       amountPaise: result.refund_amount_paise,
       note: result.tier_code,
     })
 
-    const status = mapRefundStatus(cf.refund_status)
+    const status = mapRefundStatus(refund.status)
     await service
       .from('refunds')
       .update({
-        cashfree_refund_id: String(cf.cf_refund_id),
+        provider_refund_id: refund.id,
         status,
         settled_at: status === 'success' ? new Date().toISOString() : null,
       })
@@ -160,7 +162,7 @@ export async function cancelBooking(
       ok:
         status === 'success'
           ? `Cancelled. ${formatPaise(result.refund_amount_paise)} refunded under ${result.tier_code}.`
-          : `Cancelled. ${formatPaise(result.refund_amount_paise)} refund accepted by Cashfree and is ${status} — it will settle to her original method.`,
+          : `Cancelled. ${formatPaise(result.refund_amount_paise)} refund accepted by Razorpay and is ${status} — it will settle to her original method.`,
     }
   } catch (err) {
     await service
@@ -184,7 +186,7 @@ export async function cancelBooking(
     revalidatePath(`/admin/bookings/${bookingId}`)
 
     return {
-      error: `The booking is cancelled, but Cashfree refused the ${formatPaise(
+      error: `The booking is cancelled, but Razorpay refused the ${formatPaise(
         result.refund_amount_paise,
       )} refund. It is recorded as owed and can be retried from this page — no money has moved. (${
         err instanceof Error ? err.message : 'provider error'
@@ -224,9 +226,9 @@ async function markPaymentRefunded(bookingId: string): Promise<void> {
 }
 
 /**
- * Retry a refund that Cashfree refused. Safe to press repeatedly: the refund
- * reference is unchanged, and Cashfree treats a repeat of the same refund_id as
- * the same refund rather than a second one.
+ * Retry a refund that Razorpay refused. Safe to press repeatedly: the refund
+ * reference is unchanged and is sent as the idempotency key, and both
+ * ac_refund_quote and Razorpay itself cap the total at what was captured.
  */
 const retrySchema = z.object({ refundId: z.string().uuid() })
 
@@ -242,7 +244,9 @@ export async function retryRefund(
   const service = createServiceClient()
   const { data } = await service
     .from('refunds')
-    .select('id, booking_id, amount_paise, refund_reference, tier_applied, status, payments ( cashfree_order_id )')
+    .select(
+      'id, booking_id, amount_paise, refund_reference, tier_applied, status, payments ( provider_payment_id )',
+    )
     .eq('id', parsed.data.refundId)
     .maybeSingle()
 
@@ -253,24 +257,24 @@ export async function retryRefund(
     return { ok: 'That refund has already settled. Nothing was sent again.' }
   }
 
-  const orderId = row.payments?.cashfree_order_id
-  if (!orderId) {
-    return { error: 'No captured Cashfree payment is linked to this booking.' }
+  const providerPaymentId = row.payments?.provider_payment_id
+  if (!providerPaymentId) {
+    return { error: 'No captured Razorpay payment is linked to this booking.' }
   }
 
   try {
-    const cf = await createRefund({
-      cashfreeOrderId: orderId,
+    const refund = await createRefund({
+      providerPaymentId,
       refundReference: row.refund_reference,
       amountPaise: row.amount_paise,
       note: row.tier_applied ?? 'AlongCo cancellation',
     })
 
-    const status = mapRefundStatus(cf.refund_status)
+    const status = mapRefundStatus(refund.status)
     await service
       .from('refunds')
       .update({
-        cashfree_refund_id: String(cf.cf_refund_id),
+        provider_refund_id: refund.id,
         status,
         settled_at: status === 'success' ? new Date().toISOString() : null,
       })
@@ -289,7 +293,7 @@ export async function retryRefund(
     revalidatePath('/admin/payments')
 
     return {
-      ok: `${formatPaise(row.amount_paise)} refund is now ${status} with Cashfree.`,
+      ok: `${formatPaise(row.amount_paise)} refund is now ${status} with Razorpay.`,
     }
   } catch (err) {
     await writeAudit(admin, {
@@ -299,7 +303,7 @@ export async function retryRefund(
       metadata: { amount_paise: row.amount_paise },
     })
     return {
-      error: `Cashfree refused it again. The refund is still recorded as owed. (${
+      error: `Razorpay refused it again. The refund is still recorded as owed. (${
         err instanceof Error ? err.message : 'provider error'
       })`,
     }

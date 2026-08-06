@@ -8,7 +8,7 @@ describe('OTP rate limit', () => {
   beforeEach(resetData)
   afterAll(closePool)
 
-  it('refuses the sixth OTP request for a phone number in one minute', async () => {
+  it('refuses the sixth OTP request for one address in one minute', async () => {
     const attempts = await Promise.all(
       Array.from({ length: 6 }, () =>
         asRole('anon', null, (client) =>
@@ -27,7 +27,7 @@ describe('OTP rate limit', () => {
       expect.objectContaining({
       allowed: false,
       retry_after_seconds: 60,
-      scope: 'phone',
+      scope: 'identifier',
       }),
     ])
   })

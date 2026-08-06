@@ -101,7 +101,7 @@ export default async function TicketPage({
         areaLabel={booking.areaName}
         bookedByLabel={firstName(customer.full_name)}
         amountLabel={formatPaise(booking.amountPaise)}
-        methodLabel={`${(booking.paymentMethod ?? 'PAID').toUpperCase()} · CASHFREE`}
+        methodLabel={`${(booking.paymentMethod ?? 'PAID').toUpperCase()} · RAZORPAY`}
         termsLabel={`TERMS ${booking.termsVersion} ACCEPTED`}
         conductSummary={CONDUCT_SUMMARY}
         cancelled={cancelled}

@@ -5,7 +5,7 @@ import { useFormStatus } from 'react-dom'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { FieldError, FieldHelp, FieldLabel, Input } from '@/components/ui/field'
-import { formatPhone } from '@/lib/auth/phone'
+import { maskEmail } from '@/lib/auth/email'
 import { requestOtp, verifyOtp, type OtpState } from '../actions'
 
 export function SignInForm({ next }: { next?: string }) {
@@ -13,27 +13,28 @@ export function SignInForm({ next }: { next?: string }) {
   const [verifyState, verify] = useActionState<OtpState, FormData>(verifyOtp, {})
 
   const sent = requestState.sent || verifyState.sent
-  const phone = verifyState.phone ?? requestState.phone
+  const email = verifyState.email ?? requestState.email
 
-  if (!sent || !phone) {
+  if (!sent || !email) {
     return (
-      <form action={request} className="flex flex-col gap-4 bg-white px-[18px] py-5">
+      <form action={request} className="mx-auto flex w-full max-w-[560px] flex-col gap-4 bg-white px-[18px] py-5">
         <div>
-          <FieldLabel htmlFor="phone">Mobile number</FieldLabel>
+          <FieldLabel htmlFor="email">Email address</FieldLabel>
           <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel"
+            id="email"
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
             required
             autoFocus
-            placeholder="98765 43210"
-            defaultValue={requestState.phone ?? ''}
-            className="font-mono"
+            spellCheck={false}
+            placeholder="you@example.com"
+            defaultValue={requestState.email ?? ''}
           />
           <FieldHelp>
-            Indian mobile numbers only. We do not ask for an email or an address.
+            We send a 6-digit code. Your number comes later, so we can confirm on
+            WhatsApp.
           </FieldHelp>
           <FieldError>{requestState.error}</FieldError>
         </div>
@@ -54,20 +55,20 @@ export function SignInForm({ next }: { next?: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 bg-white px-[18px] py-5">
+    <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 bg-white px-[18px] py-5">
       <form action={verify} className="flex flex-col gap-4">
-        <input type="hidden" name="phone" value={phone} />
+        <input type="hidden" name="email" value={email} />
         {next ? <input type="hidden" name="next" value={next} /> : null}
         <div>
           <FieldLabel
             htmlFor="token"
             hint={
               <span className="font-mono text-[10px] font-medium text-ink/40">
-                {formatPhone(phone)}
+                {maskEmail(email)}
               </span>
             }
           >
-            The code we sent on WhatsApp
+            The code we emailed you
           </FieldLabel>
           <Input
             id="token"
@@ -76,18 +77,21 @@ export function SignInForm({ next }: { next?: string }) {
             autoComplete="one-time-code"
             required
             autoFocus
-            maxLength={8}
+            maxLength={6}
             placeholder="000000"
             className="text-center font-mono text-[20px] tracking-[0.4em]"
           />
-          <FieldHelp>It expires in a few minutes.</FieldHelp>
+          <FieldHelp>
+            It expires in a few minutes. Check your spam folder if it has not
+            arrived.
+          </FieldHelp>
           <FieldError>{verifyState.error}</FieldError>
         </div>
         <SubmitButton>Verify and continue</SubmitButton>
       </form>
 
       <form action={request}>
-        <input type="hidden" name="phone" value={phone} />
+        <input type="hidden" name="email" value={email} />
         <ResendButton />
       </form>
     </div>

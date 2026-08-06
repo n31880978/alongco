@@ -280,7 +280,9 @@ export type AdminBookingDetail = {
   refundTierApplied: string | null
   payment: {
     id: string
-    cashfreeOrderId: string
+    provider: string
+    providerOrderId: string
+    providerPaymentId: string | null
     status: PaymentStatus
     amountPaise: number
     method: string | null
@@ -315,7 +317,7 @@ export async function getAdminBooking(id: string): Promise<AdminBookingDetail | 
        areas ( name ),
        companions ( id, display_name ),
        customers ( id, full_name, phone ),
-       payments ( id, cashfree_order_id, status, amount_paise, method, captured_at ),
+       payments ( id, payment_provider, provider_order_id, provider_payment_id, status, amount_paise, method, captured_at ),
        refunds ( id, amount_paise, status, tier_applied, created_at ),
        booking_events ( id, from_status, to_status, actor_type, reason, created_at ),
        incidents ( id, type, status, created_at )`,
@@ -362,7 +364,9 @@ export async function getAdminBooking(id: string): Promise<AdminBookingDetail | 
     payment: captured
       ? {
           id: captured.id,
-          cashfreeOrderId: captured.cashfree_order_id,
+          provider: captured.payment_provider,
+          providerOrderId: captured.provider_order_id,
+          providerPaymentId: captured.provider_payment_id,
           status: captured.status,
           amountPaise: captured.amount_paise,
           method: captured.method,
@@ -573,7 +577,7 @@ export async function listAdminCustomers(
 // --- payments reconciliation (PRD §6.11) -------------------------------------
 //
 // Read-only by decision: payouts to companions are settled manually outside the
-// product, so this reconciles what Cashfree did and stops there. No "owed"
+// product, so this reconciles what the gateway did and stops there. No "owed"
 // figure is computed and no payout is recorded here.
 
 export type PaymentsSummary = {

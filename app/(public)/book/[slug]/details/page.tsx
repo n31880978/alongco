@@ -6,7 +6,7 @@ import { getOwnBooking, isHoldLive } from '@/lib/booking/queries'
 import { getCurrentCustomer } from '@/lib/auth/session'
 import { getCompanion } from '@/lib/companions'
 import { formatPaise } from '@/lib/booking/pricing'
-import { maskPhone } from '@/lib/auth/phone'
+import { maskEmail } from '@/lib/auth/email'
 import { HoldExpired } from '../_components/hold-expired'
 import { DetailsForm } from './_components/details-form'
 
@@ -68,15 +68,16 @@ export default async function DetailsPage({
           Three things, and nothing else
         </h1>
         <p className="font-sans text-[12.5px] leading-[1.5] text-ink/60">
-          We ask for the minimum the booking needs. No email, no address, no photo.
+          We ask for the minimum the booking needs. No address, no photo.
         </p>
       </section>
 
       <DetailsForm
         slug={slug}
         bookingId={booking.id}
-        maskedPhone={maskPhone(customer.phone)}
+        maskedEmail={maskEmail(customer.email ?? '')}
         defaultName={customer.full_name ?? ''}
+        defaultPhone={customer.phone ?? ''}
         defaultAreaId={booking.areaId}
         defaultNotes={booking.customerNotes ?? ''}
         areas={areas}

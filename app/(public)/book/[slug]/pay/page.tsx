@@ -115,7 +115,7 @@ export default async function PayPage({
           />
           <div className="flex items-baseline justify-between pt-[13px]">
             <dt className="font-sans text-[14px] font-semibold text-ink">Total due now</dt>
-            {/* The snapshotted amount. This is exactly what Cashfree is asked for. */}
+            {/* The snapshotted amount. This is exactly what the gateway is asked for. */}
             <dd className="font-mono text-[22px] font-bold text-ink">
               {formatPaise(booking.amountPaise)}
             </dd>

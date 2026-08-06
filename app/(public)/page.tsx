@@ -53,17 +53,22 @@ export default async function LandingPage() {
             </div>
           )}
 
-          <h1 className="mb-3.5 font-serif text-[36px] font-light leading-[1.08] tracking-[-0.02em] text-ink">
-            <span className="block animate-rise [animation-delay:.06s]">
-              Someone to come
+          {/* The three-line break is the design's, at 375px. From md the lines
+              become spans in a normally-wrapping heading, so a wider screen
+              fills the measure instead of keeping a phone's ragged edge. */}
+          <h1 className="mb-3.5 font-serif text-[36px] font-light leading-[1.08] tracking-[-0.02em] text-ink md:text-[52px] lg:text-[60px]">
+            <span className="block animate-rise [animation-delay:.06s] md:inline">
+              Someone to come{' '}
             </span>
-            <span className="block animate-rise [animation-delay:.16s]">
-              along, for an
+            <span className="block animate-rise [animation-delay:.16s] md:inline">
+              along, for an{' '}
             </span>
-            <span className="block animate-rise [animation-delay:.26s]">hour.</span>
+            <span className="block animate-rise [animation-delay:.26s] md:inline">
+              hour.
+            </span>
           </h1>
 
-          <p className="mb-5 max-w-[310px] animate-rise font-sans text-[15px] leading-[1.55] text-ink/70 [animation-delay:.34s] [text-wrap:pretty]">
+          <p className="mb-5 max-w-[310px] animate-rise font-sans text-[15px] leading-[1.55] text-ink/70 [animation-delay:.34s] [text-wrap:pretty] md:max-w-[46ch] md:text-[17px]">
             A public place you choose, an hour you booked, and a clear way to end it.{' '}
             <span className="font-semibold text-ink">
               {formatPaise(baseRate)} an hour.

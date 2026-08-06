@@ -15,9 +15,9 @@ breaking one produces either a legal problem, a double-booked customer, or a los
 | Framework | Next.js (App Router), TypeScript, React Server Components by default |
 | Styling | Tailwind CSS + shadcn/ui |
 | Database | Supabase Postgres (RLS on every table) |
-| Auth | Supabase Auth, phone OTP over SMS via MSG91 (Send-SMS auth hook) |
+| Auth | Supabase Auth. Customers: email OTP (6-digit code). Admins: email + password |
 | Storage | Supabase Storage — `companion-photos` (public), `companion-docs` (private) |
-| Payments | Cashfree Payment Gateway, API version `2025-01-01` |
+| Payments | Razorpay Standard Checkout. Integer paise end to end |
 | Messaging | WhatsApp Business **app**, sent manually by an admin. No API integration in v1. |
 | Hosting | Vercel + Vercel Cron |
 | Analytics | Google Analytics |
@@ -43,12 +43,13 @@ app/
     dashboard/ bookings/ confirmations/ companions/
     customers/ payments/ reviews/ incidents/ settings/
   api/
-    webhooks/cashfree/route.ts
+    webhooks/razorpay/route.ts
     cron/expire-holds/route.ts
     cron/complete-bookings/route.ts
 lib/
   supabase/{server,client,service}.ts
-  cashfree/{orders,refunds,verify}.ts
+  payments/provider.ts             # active gateway + neutral status types
+  payments/razorpay/{client,orders,refunds,verify}.ts
   booking/{availability,hold,pricing,refund-tiers}.ts
   whatsapp/message-templates.ts   # plain strings, copied by hand
 supabase/migrations/
@@ -68,10 +69,11 @@ without rendering anything.
    `companions.hourly_rate_paise` and snapshotted onto the booking at creation.
 2. **Money is integer paise.** No floats, no `Number.toFixed` arithmetic, anywhere in the
    payment path.
-3. **A booking is confirmed by verified webhook only.** The browser redirect after Cashfree
-   checkout is a UX signal. It never sets `confirmed`.
+3. **A booking is confirmed by verified webhook only.** The Razorpay checkout handshake
+   is a UX signal — verified, but only to decide what she is told. It never sets
+   `confirmed`.
 4. **Webhook handlers are idempotent**, keyed on the provider event ID in `webhook_events`.
-   Cashfree retries.
+   Razorpay retries.
 5. **Overlap prevention lives in the database** (`bookings_no_overlap`, a GiST exclusion
    constraint). Never rely on UI filtering or a read-then-write check.
 6. **`companion_identities` is service-role only.** Real names, phone numbers, and ID
@@ -89,7 +91,7 @@ without rendering anything.
     rupee (₹898, ₹1,048); a 50% refund of ₹499 is ₹249.50. Two different rules, on
     purpose — see the comment on `ac_refund_quote`.
 12. **Companion payouts are settled manually, outside the product.** The payments screen
-    reconciles what Cashfree did and reports hours delivered. It never computes an
+    reconciles what the gateway did and reports hours delivered. It never computes an
     amount owed.
 
 ---
@@ -185,10 +187,10 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=        # server only, never imported into a client component
 DATABASE_URL=                     # transaction pooler
-CASHFREE_APP_ID=
-CASHFREE_SECRET_KEY=
-CASHFREE_ENV=sandbox              # sandbox | production
-CASHFREE_WEBHOOK_SECRET=
+RAZORPAY_KEY_ID=                  # rzp_test_* or rzp_live_*; mode is read from this
+RAZORPAY_KEY_SECRET=              # server only, never reaches the browser
+RAZORPAY_WEBHOOK_SECRET=
+OTP_HASH_SALT=                    # salts the irreversible abuse-counter hashes
 CRON_SECRET=                      # verified on /api/cron/* routes
 NEXT_PUBLIC_SITE_URL=
 ADMIN_HOST=admin.alongco.com

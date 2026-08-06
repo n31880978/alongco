@@ -73,11 +73,11 @@ export default async function BrowsePage({
       <TrackView event="view_browse" />
       <PublicHeader />
 
-      <section className="border-b border-ink/10 bg-white px-[18px] pb-3.5 pt-[18px]">
-        <h1 className="mb-1.5 font-serif text-[25px] font-light leading-[1.2] text-ink">
+      <section className="border-b border-ink/10 bg-white px-[18px] pb-3.5 pt-[18px] md:px-8 md:pb-5 md:pt-8">
+        <h1 className="mb-1.5 font-serif text-[25px] font-light leading-[1.2] text-ink md:text-[32px]">
           Taking bookings this week
         </h1>
-        <p className="font-sans text-[13px] leading-[1.5] text-ink/60">
+        <p className="max-w-[62ch] font-sans text-[13px] leading-[1.5] text-ink/60 md:text-[14px]">
           {accepting.length === 0
             ? 'Nobody is open for bookings right now.'
             : `${spell(accepting.length)} ${accepting.length === 1 ? 'man' : 'men'}, listed under pseudonyms with current photographs.${
@@ -88,17 +88,22 @@ export default async function BrowsePage({
 
       <AreaFilter areas={areas.map((a) => a.name)} active={params.area ?? null} />
 
-      <section className="flex flex-col gap-3 px-[18px] pb-[18px] pt-3.5">
+      <section className="px-[18px] pb-[18px] pt-3.5 md:px-8 md:pb-10 md:pt-5">
         {filtered.length === 0 ? (
           <EmptyState hasFilter={Boolean(params.area)} />
         ) : (
-          filtered.map((c) => (
-            <CompanionCard
-              key={c.id}
-              companion={c}
-              status={c.isAccepting ? statusFor(c.id) : undefined}
-            />
-          ))
+          /* One column on a phone, exactly as drawn. Two from md, three from
+             lg — the card is a fixed-height row, so it tiles without any
+             change to the card itself. */
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((c) => (
+              <CompanionCard
+                key={c.id}
+                companion={c}
+                status={c.isAccepting ? statusFor(c.id) : undefined}
+              />
+            ))}
+          </div>
         )}
       </section>
     </>

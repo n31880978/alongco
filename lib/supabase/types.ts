@@ -88,7 +88,10 @@ export type Area = {
 export type Customer = {
   id: string
   auth_user_id: string | null
-  phone: string
+  /** Verified at sign-in. The identity the account is keyed on. */
+  email: string | null
+  /** Self-declared at checkout for WhatsApp coordination, not verified. */
+  phone: string | null
   full_name: string | null
   consent_version: string | null
   consent_at: string | null
@@ -129,9 +132,10 @@ export type Booking = {
 export type Payment = {
   id: string
   booking_id: string
-  cashfree_order_id: string
-  cashfree_payment_id: string | null
-  payment_session_id: string | null
+  payment_provider: 'razorpay' | 'cashfree'
+  provider_order_id: string
+  provider_payment_id: string | null
+  provider_session_id: string | null
   amount_paise: number
   status: PaymentStatus
   method: string | null
@@ -144,7 +148,7 @@ export type Refund = {
   id: string
   payment_id: string
   booking_id: string
-  cashfree_refund_id: string | null
+  provider_refund_id: string | null
   refund_reference: string
   amount_paise: number
   status: RefundStatus
@@ -275,7 +279,7 @@ export type Database = {
       }>
       otp_requests: Table<{
         id: string
-        phone_hash: string
+        identifier_hash: string
         ip_hash: string
         requested_at: string
       }>
@@ -341,7 +345,7 @@ export type Database = {
         Returns: string
       }
       ac_consume_otp_rate_limit: {
-        Args: { p_phone_hash: string; p_ip_hash: string }
+        Args: { p_identifier_hash: string; p_ip_hash: string }
         Returns: {
           allowed: boolean
           retry_after_seconds: number
@@ -353,6 +357,7 @@ export type Database = {
         Args: {
           p_booking_id: string
           p_full_name: string
+          p_phone: string
           p_area_id: string
           p_notes?: string | null
         }
@@ -411,7 +416,9 @@ export type Database = {
           refund_id: string | null
           refund_reference: string | null
           incident_id: string | null
-          cashfree_order_id: string | null
+          payment_provider: string | null
+          provider_order_id: string | null
+          provider_payment_id: string | null
         }
       }
       ac_review_publishable: { Args: { p_review_id: string }; Returns: boolean }

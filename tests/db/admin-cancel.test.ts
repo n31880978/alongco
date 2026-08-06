@@ -54,7 +54,7 @@ async function seedPaidBooking(hoursOut: number, amountPaise = 49900) {
   ])
 
   const [{ id: paymentId }] = await query<{ id: string }>(
-    `insert into payments (booking_id, cashfree_order_id, cashfree_payment_id,
+    `insert into payments (booking_id, provider_order_id, provider_payment_id,
                            amount_paise, status, captured_at)
      values ($1,$2,$3,$4,'captured', now()) returning id`,
     [bookingId, `order_${reference}`, `pay_${reference}`, amountPaise],
@@ -71,7 +71,7 @@ type CancelResult = {
   refund_id: string | null
   refund_reference: string | null
   incident_id: string | null
-  cashfree_order_id: string | null
+  provider_order_id: string | null
 }
 
 async function cancel(

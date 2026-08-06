@@ -3,7 +3,7 @@ import { GRIEVANCE_EMAIL, SUPPORT_PHONE } from '@/lib/contact'
 /**
  * The four policy documents. PRD §6.12.
  *
- * These are not marketing copy. A published refund policy is a Cashfree
+ * These are not marketing copy. A published refund policy is a payment-gateway
  * onboarding requirement, the privacy notice is a DPDP Act 2023 obligation, and
  * the conduct policy is the thing accepted at checkout — so it must match
  * lib/booking/terms.ts word for word in substance.
@@ -129,7 +129,7 @@ export const POLICIES: Record<Policy['slug'], Policy> = {
       },
       {
         heading: 'Who processes it for us',
-        body: 'Supabase hosts our database. Cashfree Payments processes payments and holds the payment records the law requires them to hold — we never see or store your card or UPI credentials. Vercel hosts the website. Google Analytics gives us anonymous traffic figures.',
+        body: 'Supabase hosts our database. Razorpay processes payments and holds the payment records the law requires them to hold — we never see or store your card or UPI credentials. Vercel hosts the website. Google Analytics gives us anonymous traffic figures.',
       },
       {
         heading: 'Grievance contact',
@@ -157,7 +157,7 @@ export const POLICIES: Record<Policy['slug'], Policy> = {
       },
       {
         heading: 'Paying',
-        body: 'The full amount is due at checkout, in Indian rupees, through Cashfree Payments. The price is fixed when you book: if we change a companion’s rate afterwards, you still pay what your ticket says. We hold your slot for ten minutes while you pay, and nothing is charged if that hold lapses.',
+        body: 'The full amount is due at checkout, in Indian rupees, through Razorpay. The price is fixed when you book: if we change a companion’s rate afterwards, you still pay what your ticket says. We hold your slot for ten minutes while you pay, and nothing is charged if that hold lapses.',
       },
       {
         heading: 'Timing',

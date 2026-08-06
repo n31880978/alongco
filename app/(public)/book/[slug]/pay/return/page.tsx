@@ -5,6 +5,7 @@ import { PublicHeader } from '@/components/site/header'
 import { getOwnBooking, isHoldLive } from '@/lib/booking/queries'
 import { getCurrentCustomer } from '@/lib/auth/session'
 import { SUPPORT_PHONE, SUPPORT_PHONE_HREF } from '@/lib/contact'
+import { verifyCheckoutSignature } from '@/lib/payments/razorpay/verify'
 import { PendingPoller } from './_components/pending-poller'
 
 export const dynamic = 'force-dynamic'
@@ -15,21 +16,34 @@ export const metadata: Metadata = {
 }
 
 /**
- * Where Cashfree sends the browser after checkout.
+ * Where the browser lands after checkout.
  *
  * CLAUDE.md §3.3: this page is a UX signal. It reads booking state and never
  * writes it — the webhook is what confirms. So the honest thing to show while
  * the webhook is in flight is "checking", not "confirmed".
+ *
+ * The Razorpay checkout handshake is verified here when present. That
+ * verification decides only what she is TOLD — "we have your payment, we are
+ * confirming it" versus "we did not see a completed payment". It never sets a
+ * status. A forged signature therefore buys nothing: the booking still waits
+ * for the webhook, and a genuine one that arrives before the webhook still
+ * shows as pending rather than confirmed.
  */
 export default async function PaymentReturnPage({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ b?: string }>
+  searchParams: Promise<{
+    b?: string
+    razorpay_order_id?: string
+    razorpay_payment_id?: string
+    razorpay_signature?: string
+  }>
 }) {
   const { slug } = await params
-  const { b } = await searchParams
+  const sp = await searchParams
+  const b = sp.b
   if (!b) notFound()
 
   const customer = await getCurrentCustomer()
@@ -76,12 +90,22 @@ export default async function PaymentReturnPage({
 
   const stillHeld = isHoldLive(booking)
 
+  // Signal only — see the note above. Never a reason to change state.
+  const checkoutCompleted =
+    Boolean(sp.razorpay_order_id && sp.razorpay_payment_id && sp.razorpay_signature) &&
+    verifyCheckoutSignature(
+      sp.razorpay_order_id!,
+      sp.razorpay_payment_id!,
+      sp.razorpay_signature!,
+    )
+
   return (
     <>
       <PublicHeader back={{ href: '/bookings', label: 'Your bookings' }} />
       <PendingPoller
         reference={booking.reference}
         stillHeld={stillHeld}
+        checkoutCompleted={checkoutCompleted}
         retryHref={`/book/${slug}/pay?b=${booking.id}`}
       />
     </>

@@ -15,10 +15,16 @@ import { SUPPORT_PHONE, SUPPORT_PHONE_HREF } from '@/lib/contact'
 export function PendingPoller({
   reference,
   stillHeld,
+  checkoutCompleted,
   retryHref,
 }: {
   reference: string
   stillHeld: boolean
+  /**
+   * The Razorpay checkout handshake verified server-side. Changes the wording
+   * only — this component still cannot confirm anything.
+   */
+  checkoutCompleted: boolean
   retryHref: string
 }) {
   const router = useRouter()
@@ -45,12 +51,14 @@ export function PendingPoller({
           <span className="absolute inset-0 animate-pulse2 rounded-full bg-blue" />
         </span>
         <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-blue-dark">
-          CHECKING WITH THE PAYMENT PROVIDER
+          {checkoutCompleted ? 'PAYMENT RECEIVED · CONFIRMING' : 'CHECKING WITH THE PAYMENT PROVIDER'}
         </span>
       </div>
 
       <h1 className="mb-2 font-serif text-[22px] font-light leading-[1.22] text-ink">
-        Hold on — we are confirming your payment
+        {checkoutCompleted
+          ? 'Your payment went through — we are confirming it'
+          : 'Hold on — we are confirming your payment'}
       </h1>
       <p className="mb-4 font-sans text-[13px] leading-[1.5] text-ink/65">
         Your bank tells us directly, which is more reliable than this page. It usually

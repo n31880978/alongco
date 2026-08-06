@@ -1,18 +1,26 @@
 'use server'
 
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getCurrentCustomer } from '@/lib/auth/session'
 import { getSettings } from '@/lib/settings'
-import { createOrder } from '@/lib/cashfree/orders'
+import { createOrder } from '@/lib/payments/razorpay/orders'
+import { ACTIVE_PROVIDER } from '@/lib/payments/provider'
 import { bookingErrorMessage } from '@/lib/booking/errors'
 import { getOwnBooking, isHoldLive } from '@/lib/booking/queries'
 
 export type PayState = {
   error?: string
-  /** Handed to the Cashfree JS SDK to open checkout. */
-  paymentSessionId?: string
+  /** Everything Checkout.js needs to open. Contains no secret. */
+  order?: {
+    orderId: string
+    amountPaise: number
+    keyId: string
+    reference: string
+    prefillName: string | null
+    prefillEmail: string | null
+    prefillContact: string | null
+  }
   expired?: boolean
 }
 
@@ -25,10 +33,13 @@ const schema = z.object({
 })
 
 /**
- * Creates the Cashfree order and hands back a payment_session_id.
+ * Creates the Razorpay order and hands back what Checkout.js needs to open.
  *
  * This does NOT confirm anything. CLAUDE.md §3.3 — a booking becomes confirmed
  * on a verified webhook and nowhere else. All this does is open a checkout.
+ *
+ * The key id returned here is Razorpay's publishable key, which is designed to
+ * be in the browser. The key secret never leaves the server.
  */
 export async function startPayment(
   _prev: PayState,
@@ -62,60 +73,65 @@ export async function startPayment(
   const settings = await getSettings()
   // The terms she ticked must be the ones the booking recorded. If either has
   // moved on, she has to read the current text before paying (§3.8).
-  if (termsVersion !== settings.termsVersion || booking.termsVersion !== settings.termsVersion) {
+  if (
+    termsVersion !== settings.termsVersion ||
+    booking.termsVersion !== settings.termsVersion
+  ) {
     return { error: bookingErrorMessage('AC_TERMS_STALE') }
   }
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL
-  if (!site) return { error: 'Payments are not configured yet. Please call us to book.' }
-
-  // A fresh order per attempt, so a retry after a decline is a new Cashfree
-  // order against the same booking (PRD §6.6) rather than a reused one.
-  const attempt = Date.now().toString(36).toUpperCase()
-  const orderId = `${booking.reference}-${attempt}`
-
-  // Service role: payments is service_role-only by policy (§3.9). The row is
-  // written before the call so a successful order can never be orphaned.
-  const service = createServiceClient()
-  const { error: insertError } = await service.from('payments').insert({
-    booking_id: booking.id,
-    cashfree_order_id: orderId,
-    amount_paise: booking.amountPaise,
-    status: 'created',
-  })
-  if (insertError) {
-    return { error: 'We could not start the payment. Nothing was charged — try again.' }
+  const keyId = process.env.RAZORPAY_KEY_ID?.trim()
+  if (!keyId) {
+    return { error: 'Payments are not configured yet. Please call us to book.' }
   }
+
+  // A fresh receipt per attempt, so a retry after a decline is a new Razorpay
+  // order against the same booking (PRD §6.6) rather than a reused one.
+  // Razorpay caps receipt at 40 characters.
+  const attempt = Date.now().toString(36).toUpperCase()
+  const receipt = `${booking.reference}-${attempt}`.slice(0, 40)
 
   try {
     const order = await createOrder({
-      orderId,
+      receipt,
       // Straight off the booking row the RPC snapshotted. The browser never
       // supplied it and cannot influence it (§3.1).
       amountPaise: booking.amountPaise,
       bookingReference: booking.reference,
-      customer: {
-        id: customer.id,
-        phone: customer.phone,
-        name: customer.full_name,
-      },
-      returnUrl: `${site}/book/${booking.companionSlug}/pay/return?b=${booking.id}`,
-      notifyUrl: `${site}/api/webhooks/cashfree`,
-      expiresAt: new Date(booking.holdExpiresAt!),
     })
 
-    await service
-      .from('payments')
-      .update({ payment_session_id: order.payment_session_id })
-      .eq('cashfree_order_id', orderId)
+    // Service role: payments is service_role-only by policy (§3.9). Written
+    // AFTER the order exists, because Razorpay assigns the order id — there is
+    // nothing to key the row on until it answers. If this insert fails, the
+    // orphaned Razorpay order is simply never paid: it opens no checkout.
+    const service = createServiceClient()
+    const { error: insertError } = await service.from('payments').insert({
+      booking_id: booking.id,
+      payment_provider: ACTIVE_PROVIDER,
+      provider_order_id: order.id,
+      amount_paise: booking.amountPaise,
+      status: 'created',
+    })
 
-    return { paymentSessionId: order.payment_session_id }
-  } catch (error) {
-    await service
-      .from('payments')
-      .update({ status: 'failed', failure_reason: 'order_create_failed' })
-      .eq('cashfree_order_id', orderId)
+    if (insertError) {
+      return {
+        error:
+          'We could not start the payment, so nothing was charged. Your slot is still held — try again, or call us.',
+      }
+    }
 
+    return {
+      order: {
+        orderId: order.id,
+        amountPaise: booking.amountPaise,
+        keyId,
+        reference: booking.reference,
+        prefillName: customer.full_name,
+        prefillEmail: customer.email,
+        prefillContact: customer.phone,
+      },
+    }
+  } catch {
     // Never "something went wrong" here — she needs to know her money did not
     // move (CLAUDE.md §6).
     return {

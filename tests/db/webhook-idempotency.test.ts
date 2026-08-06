@@ -47,7 +47,7 @@ describe('webhook idempotency', () => {
     bookingId = booking.id
 
     const [payment] = await query<{ id: string }>(
-      `insert into payments (booking_id, cashfree_order_id, amount_paise, status)
+      `insert into payments (booking_id, provider_order_id, amount_paise, status)
        values ($1, 'AC-HOOK01-A', 49900, 'created') returning id`,
       [bookingId],
     )

@@ -5,7 +5,7 @@ import { useFormStatus } from 'react-dom'
 import { Button } from '@/components/ui/button'
 import { retryRefund, type BookingActionState } from '../../actions'
 
-/** Re-sends a refund Cashfree refused. Idempotent on the refund reference. */
+/** Re-sends a refund the gateway refused. Idempotent on the refund reference. */
 export function RetryRefundButton({ refundId }: { refundId: string }) {
   const [state, action] = useActionState<BookingActionState, FormData>(retryRefund, {})
 

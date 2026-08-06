@@ -242,9 +242,9 @@ export default async function BookingDetailPage({
                     </span>
                   )}
                 </DefinitionRow>
-                <DefinitionRow label="CASHFREE ORDER">
+                <DefinitionRow label="GATEWAY ORDER">
                   <span className="font-mono text-[11px] text-ink/60">
-                    {booking.payment.cashfreeOrderId}
+                    {booking.payment.providerOrderId}
                   </span>
                 </DefinitionRow>
               </>
@@ -284,9 +284,9 @@ export default async function BookingDetailPage({
                 {owedRefund && hasRole(admin, 'ops') && (
                   <div className="mt-2.5">
                     <p className="mb-2 text-[12.5px] leading-[1.5] text-rose-deep">
-                      This refund is recorded as owed but has not settled with Cashfree.
-                      Retrying is safe — the same refund reference is reused, so Cashfree
-                      will not issue a second one.
+                      This refund is recorded as owed but has not settled with the
+                      gateway. Retrying is safe — the same refund reference is reused as
+                      the idempotency key, so a second refund cannot be issued.
                     </p>
                     <RetryRefundButton refundId={owedRefund.id} />
                   </div>

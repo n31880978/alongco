@@ -4,13 +4,13 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 
 /**
- * OTP throttling. PRD §6.3 — rate limited per phone number and per IP.
+ * OTP throttling. PRD §6.3 — rate limited per identity and per IP.
  *
  * Supabase Auth has its own limits, but they are global rather than tunable per
  * project the way this needs to be, so the window is enforced here as well.
  *
- * Nothing stored is reversible to a phone number (CLAUDE.md §9): only a salted
- * hash goes into otp_requests, and the raw number never reaches a log line.
+ * Nothing stored is reversible to the address (CLAUDE.md §9): only a salted
+ * hash goes into otp_requests, and the raw value never reaches a log line.
  */
 
 function salt(): string {
@@ -32,14 +32,15 @@ export async function clientIp(): Promise<string> {
 
 export type RateLimitResult =
   | { ok: true }
-  | { ok: false; retryAfterSeconds: number; scope: 'phone' | 'ip' }
+  | { ok: false; retryAfterSeconds: number; scope: 'identifier' | 'ip' }
 
-export async function checkOtpRateLimit(phone: string): Promise<RateLimitResult> {
+/** `identifier` is the email address sign-in was requested for. */
+export async function checkOtpRateLimit(identifier: string): Promise<RateLimitResult> {
   const supabase = await createClient()
-  const phoneHash = hashIdentifier(phone)
+  const identifierHash = hashIdentifier(identifier)
   const ipHash = hashIdentifier(await clientIp())
   const { data, error } = await supabase.rpc('ac_consume_otp_rate_limit', {
-    p_phone_hash: phoneHash,
+    p_identifier_hash: identifierHash,
     p_ip_hash: ipHash,
   })
   const row = data?.[0]
@@ -50,7 +51,7 @@ export async function checkOtpRateLimit(phone: string): Promise<RateLimitResult>
   return {
     ok: false,
     retryAfterSeconds: row.retry_after_seconds,
-    scope: row.scope === 'ip' ? 'ip' : 'phone',
+    scope: row.scope === 'ip' ? 'ip' : 'identifier',
   }
 }
 

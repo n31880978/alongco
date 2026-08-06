@@ -9,7 +9,7 @@ import type { Database } from './types'
  * error, not a runtime leak (CLAUDE.md §7).
  *
  * Only these paths may use it:
- *   - the Cashfree webhook and the cron routes
+ *   - the payment webhook and the cron routes
  *   - admin server actions, after the caller has been checked against admin_users
  *   - reads of companion_identities, which has no client policy at all (§3.6)
  *

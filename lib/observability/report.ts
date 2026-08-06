@@ -26,7 +26,7 @@ export type Severity = 'warning' | 'error' | 'critical'
  * should page someone, as opposed to the ordinary noise of a web app.
  */
 export type Channel =
-  | 'webhook' // Cashfree told us something and we could not process it
+  | 'webhook' // the gateway told us something and we could not process it
   | 'cron' // holds are not expiring, or bookings are not completing
   | 'refund' // money owed and not sent
   | 'payment' // order creation failed

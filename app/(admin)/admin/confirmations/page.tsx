@@ -148,7 +148,7 @@ function QueueCard({
           )}
         </div>
         <span className="font-mono text-[10px] tracking-[0.06em] text-ink/45">
-          CASHFREE · <Money paise={row.amountPaise} className="text-[11px]" />
+          PAID · <Money paise={row.amountPaise} className="text-[11px]" />
         </span>
       </div>
 
