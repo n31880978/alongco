@@ -1,10 +1,13 @@
 import * as React from 'react'
-import { Slot } from '@radix-ui/react-slot'
+import { Slot, Slottable } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-lg font-sans font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60',
+  // `isolate` gives the sheen its own stacking context: at -z-10 it paints over
+  // the button's background but under the label, which is what the fragment's
+  // `relative z-10` wrapper used to do before it broke `asChild`.
+  'isolate inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-sans font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60',
   {
     variants: {
       variant: {
@@ -39,21 +42,29 @@ export interface ButtonProps
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, sheen, children, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button'
+
     return (
       <Comp
         ref={ref}
         className={cn(buttonVariants({ variant, size }), className)}
         {...props}
       >
-        <>
-          {sheen && variant !== 'outline' ? (
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-y-0 w-[38%] animate-sheen bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.34),rgba(255,255,255,0))]"
-            />
-          ) : null}
-          <span className="relative z-10 flex items-center gap-2">{children}</span>
-        </>
+        {sheen && variant !== 'outline' ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 -z-10 w-[38%] animate-sheen bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.34),rgba(255,255,255,0))]"
+          />
+        ) : null}
+        {/*
+          Slottable, not a bare fragment.
+
+          With `asChild`, Slot merges its props onto its single child. Wrapping
+          these in a fragment made the FRAGMENT that child, so every class name
+          landed on a React.Fragment — which silently drops them — and an
+          `asChild` button rendered as unstyled link text. Slottable marks which
+          child Slot should merge onto, and lets the sheen render alongside it.
+        */}
+        <Slottable>{children}</Slottable>
       </Comp>
     )
   },

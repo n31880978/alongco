@@ -41,15 +41,19 @@ export default async function CompanionProfilePage({
   return (
     <>
       <TrackView event="view_profile" companionSlug={slug} />
-      {/* Portrait */}
-      <div className="relative h-[280px] overflow-hidden bg-[#dfe6f8]">
+
+      {/* From lg the page becomes two columns: the portrait stops being a
+          280px-tall letterbox strip across a wide screen and keeps a portrait
+          shape, with everything she reads to decide sitting beside it. */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-start lg:gap-0">
+      <div className="relative h-[280px] overflow-hidden bg-[#dfe6f8] lg:h-full lg:min-h-[560px]">
         {companion.photoUrl ? (
           <Image
             src={companion.photoUrl}
             alt={companion.displayName}
             fill
             priority
-            sizes="(max-width: 768px) 100vw, 560px"
+            sizes="(max-width: 1024px) 100vw, 380px"
             className="object-cover"
           />
         ) : (
@@ -87,8 +91,9 @@ export default async function CompanionProfilePage({
         )}
       </div>
 
-      <div className="h-[3px] bg-[linear-gradient(90deg,#2E63E8,#8A6BEF_45%,#F76D8A)]" />
+      <div className="h-[3px] bg-[linear-gradient(90deg,#2E63E8,#8A6BEF_45%,#F76D8A)] lg:hidden" />
 
+      <div className="min-w-0 lg:border-l lg:border-ink/10">
       {/* Identity + bio */}
       <section className="border-b border-ink/10 bg-white px-[18px] pb-4 pt-[18px]">
         <div className="mb-2 flex items-baseline justify-between gap-3">
@@ -225,6 +230,8 @@ export default async function CompanionProfilePage({
           </div>
         )}
       </section>
+      </div>
+      </div>
     </>
   )
 }
