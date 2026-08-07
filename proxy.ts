@@ -1,4 +1,9 @@
-import { NextResponse, type NextFetchEvent, type NextRequest } from 'next/server'
+import {
+  NextResponse,
+  type NextFetchEvent,
+  type NextMiddleware,
+  type NextRequest,
+} from 'next/server'
 import { clerkMiddleware } from '@clerk/nextjs/server'
 import { updateSession } from '@/lib/supabase/proxy-session'
 
@@ -43,7 +48,22 @@ function isAdminRequest(request: NextRequest) {
   }
 }
 
-const clerk = clerkMiddleware()
+/**
+ * Constructed on first use, not at module load.
+ *
+ * clerkMiddleware() asserts a publishable key when it runs. Building it eagerly
+ * would make every admin request — which never consults Clerk — depend on Clerk
+ * being configured, and would take the admin surface down if that key were ever
+ * missing or rotated badly.
+ */
+// Typed as NextMiddleware explicitly: clerkMiddleware is overloaded, so
+// ReturnType<typeof clerkMiddleware> resolves to the wrong signature and the
+// call below stops being callable.
+let clerk: NextMiddleware | undefined
+function clerkHandler(): NextMiddleware {
+  clerk ??= clerkMiddleware() as NextMiddleware
+  return clerk
+}
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const { isAdminHost, isLocal, pathname, targetsAdmin } = isAdminRequest(request)
@@ -67,7 +87,7 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
   }
 
   // Everything customer-facing runs through Clerk.
-  return clerk(request, event)
+  return clerkHandler()(request, event)
 }
 
 export const config = {

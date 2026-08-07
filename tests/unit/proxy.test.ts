@@ -37,10 +37,17 @@ describe('host routing', () => {
 
   it('keeps the public host on the public route', async () => {
     vi.stubEnv('ADMIN_HOST', 'admin.alongco.com')
+    // The public host is the only branch that reaches Clerk — which is itself
+    // the assertion that the admin branch never does. The key comes from
+    // vitest.config.ts, because Clerk reads it at import time.
 
     const response = await proxyOf(request('alongco.com'))
 
-    expect(response.headers.get('x-middleware-rewrite')).toBeNull()
+    // Clerk's middleware sets its own rewrite header, so the assertion is not
+    // "no rewrite" but "not rewritten into the admin group" — which is the
+    // thing that would actually be a bug.
+    const rewrite = response.headers.get('x-middleware-rewrite')
+    expect(rewrite ?? '').not.toContain('/admin')
     expect(response.status).toBe(200)
   })
 

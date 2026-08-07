@@ -8,6 +8,17 @@ export default defineConfig({
     // Database tests share one Postgres instance and manage their own isolation
     // per suite; running files in parallel would interleave TRUNCATEs.
     fileParallelism: false,
+    /*
+     * Clerk reads its publishable key when @clerk/nextjs is imported, not when
+     * the middleware runs, so vi.stubEnv inside a test is too late. These are
+     * structurally valid fake keys — pk_test_ decodes to "clerk.example.com$"
+     * — and exist only so proxy.test.ts can exercise the public-host branch.
+     * Nothing here reaches a real Clerk instance.
+     */
+    env: {
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_Y2xlcmsuZXhhbXBsZS5jb20k',
+      CLERK_SECRET_KEY: 'sk_test_stub_not_a_real_key',
+    },
     testTimeout: 20_000,
     hookTimeout: 30_000,
   },
