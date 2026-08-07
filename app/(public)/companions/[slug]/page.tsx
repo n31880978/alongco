@@ -7,6 +7,7 @@ import { Mark } from '@/components/brand/mark'
 import { getCompanion, summariseRules } from '@/lib/companions'
 import { formatPaise } from '@/lib/booking/pricing'
 import { TrackView } from '@/components/analytics/ga'
+import { JsonLd, companionOfferJsonLd } from '@/lib/seo'
 
 export const revalidate = 300
 
@@ -18,9 +19,25 @@ export async function generateMetadata({
   const { slug } = await params
   const companion = await getCompanion(slug)
   if (!companion) return { title: 'Not found' }
+
+  const title = `${companion.displayName} — ${formatPaise(companion.hourlyRatePaise)} an hour`
+  const description =
+    companion.bio ??
+    `Book an hour with ${companion.displayName} in ${companion.areas.join(' or ')}. A fixed price, in a public place you choose.`
+
   return {
-    title: `${companion.displayName} — ${formatPaise(companion.hourlyRatePaise)} an hour`,
-    description: companion.bio ?? undefined,
+    title,
+    description,
+    alternates: { canonical: `/companions/${companion.slug}` },
+    openGraph: {
+      type: 'profile',
+      url: `/companions/${companion.slug}`,
+      title: `${title} · AlongCo`,
+      description,
+      // Only a real photograph. The placeholder is a striped SVG that would
+      // make a confusing search or share preview.
+      images: companion.photoUrl ? [{ url: companion.photoUrl }] : undefined,
+    },
   }
 }
 
@@ -41,6 +58,18 @@ export default async function CompanionProfilePage({
   return (
     <>
       <TrackView event="view_profile" companionSlug={slug} />
+      {/* An Offer, not a Person — see lib/seo.tsx for why that distinction
+          matters for someone listed under a pseudonym. */}
+      <JsonLd
+        data={companionOfferJsonLd({
+          displayName: companion.displayName,
+          slug: companion.slug,
+          bio: companion.bio,
+          hourlyRatePaise: companion.hourlyRatePaise,
+          areas: companion.areas,
+          photoUrl: companion.photoUrl,
+        })}
+      />
 
       {/* From lg the page becomes two columns: the portrait stops being a
           280px-tall letterbox strip across a wide screen and keeps a portrait

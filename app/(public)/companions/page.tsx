@@ -11,10 +11,22 @@ import { TrackView } from '@/components/analytics/ga'
 
 export const revalidate = 300
 
+const BROWSE_DESCRIPTION =
+  'Men listed under pseudonyms with current photographs, in MG Road, Indiranagar and Cubbon Park. A fixed hourly price, shown before you enter any details.'
+
 export const metadata: Metadata = {
   title: 'Companions taking bookings',
-  description:
-    'Men listed under pseudonyms with current photographs, in MG Road, Indiranagar and Cubbon Park.',
+  description: BROWSE_DESCRIPTION,
+  // The area filter is a query parameter on this same page. Without an
+  // explicit canonical, ?area=... would be indexed as several near-duplicate
+  // pages competing with each other.
+  alternates: { canonical: '/companions' },
+  openGraph: {
+    type: 'website',
+    url: '/companions',
+    title: 'Companions taking bookings · AlongCo',
+    description: BROWSE_DESCRIPTION,
+  },
 }
 
 export default async function BrowsePage({

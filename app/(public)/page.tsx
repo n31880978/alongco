@@ -2,20 +2,27 @@ import Link from 'next/link'
 import { Aurora } from '@/components/brand/aurora'
 import { Wordmark } from '@/components/brand/mark'
 import { Button } from '@/components/ui/button'
-import { getAvailabilityDigest, listCompanions } from '@/lib/companions'
+import { listCompanions } from '@/lib/companions'
 import { getSettings } from '@/lib/settings'
 import { formatPaise, quote } from '@/lib/booking/pricing'
-import { HeroStrip } from './_components/hero-strip'
 import { TrackView } from '@/components/analytics/ga'
+import { JsonLd, organisationJsonLd } from '@/lib/seo'
+// Restore with the hero strip — see the comment beside the call to action.
+// import { getAvailabilityDigest } from '@/lib/companions'
+// import { HeroStrip } from './_components/hero-strip'
 
 export const revalidate = 300
 
 export default async function LandingPage() {
   const [companions, settings] = await Promise.all([listCompanions(), getSettings()])
   const accepting = companions.filter((c) => c.isAccepting)
-  const digest = await getAvailabilityDigest(accepting, {
-    durationMinutes: settings.minDurationMinutes,
-  })
+
+  // Computed availability for every listed companion, which is real work on the
+  // highest-traffic page. Only the hero strip used it, so it is not run.
+  // Restore alongside the strip:
+  // const digest = await getAvailabilityDigest(accepting, {
+  //   durationMinutes: settings.minDurationMinutes,
+  // })
 
   const baseRate = accepting.length
     ? Math.min(...accepting.map((c) => c.hourlyRatePaise))
@@ -29,16 +36,16 @@ export default async function LandingPage() {
   return (
     <>
       <TrackView event="view_landing" />
-      {/* Hero — booking begins above the fold, over the drifting aurora.
+      <JsonLd data={organisationJsonLd()} />
+      {/* Hero — over the drifting aurora.
           At 375px this is the design's single column, top to bottom. From lg
-          it becomes two: the argument on the left, the actual booking widget
-          on the right — using the width for the one thing on this page that
-          is not prose, rather than just growing the prose wider. */}
+          the copy is centred on a single measure rather than split into two
+          columns, because the right-hand column no longer holds a widget. */}
       <section className="relative overflow-hidden bg-paper">
         <Aurora />
-        <div className="relative px-5 pb-6 pt-4 lg:mx-auto lg:grid lg:max-w-[1080px] lg:grid-cols-[1fr_420px] lg:items-center lg:gap-16 lg:px-8 lg:py-14">
-          <div className="lg:col-start-1">
-            <div className="mb-[26px] flex items-center justify-between lg:mb-10">
+        <div className="relative px-5 pb-6 pt-4 lg:mx-auto lg:max-w-[820px] lg:px-8 lg:py-16 lg:text-center">
+          <div>
+            <div className="mb-[26px] flex items-center justify-between lg:mb-12">
               <Wordmark size={26} />
               <span className="rounded-full border border-blue/20 bg-white/70 px-2.5 py-[5px] font-mono text-[10px] font-semibold tracking-[0.06em] text-blue-dark backdrop-blur-sm">
                 BANGALORE
@@ -73,14 +80,49 @@ export default async function LandingPage() {
               </span>
             </h1>
 
-            <p className="mb-5 max-w-[310px] animate-rise font-sans text-[15px] leading-[1.55] text-ink/70 [animation-delay:.34s] [text-wrap:pretty] md:max-w-[46ch] md:text-[17px] lg:mb-8">
+            <p className="mb-5 max-w-[310px] animate-rise font-sans text-[15px] leading-[1.55] text-ink/70 [animation-delay:.34s] [text-wrap:pretty] md:max-w-[46ch] md:text-[17px] lg:mx-auto lg:mb-8 lg:max-w-[54ch] lg:text-[18px]">
               A public place you choose, an hour you booked, and a clear way to end it.{' '}
               <span className="font-semibold text-ink">
                 {formatPaise(baseRate)} an hour.
               </span>
             </p>
 
-            <div className="flex animate-rise flex-wrap items-center gap-x-3.5 gap-y-1.5 [animation-delay:.52s]">
+            {/*
+              The direct call to action.
+
+              This replaces the interactive day/time strip that used to sit
+              here — the widget itself is still built and tested
+              (app/(public)/_components/hero-strip.tsx), and the block below
+              restores it in one edit. Two things are worth knowing before
+              putting it back:
+
+                · The strip asked her to choose a day and a time before she had
+                  seen a single companion, which is the wrong order for a
+                  decision that PRD §4 describes as a safety judgement rather
+                  than a purchase. Browsing first, then picking a time, matches
+                  how she actually decides.
+                · It also duplicated the slot picker she meets two screens
+                  later, so the same choice was made twice.
+
+              To restore: delete this Button and uncomment the block under it.
+            */}
+            <div className="animate-rise [animation-delay:.44s]">
+              <Button asChild size="lg" sheen className="w-full lg:w-auto lg:px-10">
+                <Link href="/companions">
+                  {accepting.length > 0
+                    ? 'See who is free this week'
+                    : 'Browse companions'}
+                </Link>
+              </Button>
+            </div>
+
+            {/*
+              <div className="mt-4">
+                <HeroStrip days={digest} />
+              </div>
+            */}
+
+            <div className="mt-5 flex animate-rise flex-wrap items-center gap-x-3.5 gap-y-1.5 [animation-delay:.52s] lg:justify-center">
               {[
                 'Public places only',
                 'No romance, at any price',
@@ -98,10 +140,6 @@ export default async function LandingPage() {
                 </span>
               ))}
             </div>
-          </div>
-
-          <div className="mt-4 lg:col-start-2 lg:mt-0">
-            <HeroStrip days={digest} />
           </div>
         </div>
       </section>

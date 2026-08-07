@@ -1,42 +1,48 @@
 'use server'
 
 import { z } from 'zod'
-import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { checkOtpRateLimit } from '@/lib/auth/rate-limit'
-import { emailSchema, otpTokenSchema } from '@/lib/auth/email'
-import { CONSENT_VERSION } from '@/lib/booking/terms'
+import { emailSchema } from '@/lib/auth/email'
 
 /**
- * Email OTP. Supabase generates, sends and verifies the code, so it never
- * passes through this application.
+ * Email confirmation sign-in.
  *
- * Email rather than SMS because delivering SMS in India needs DLT registration
- * and costs per message. The consequence is that the WhatsApp number is no
- * longer proven by signing in — it is collected at checkout instead (0011).
+ * She enters an address, Supabase emails a confirmation link, and clicking it
+ * lands on /auth/callback which exchanges the code and creates her customer
+ * record. Nothing is typed back into this app — there is no code to enter,
+ * because Supabase's stock template does not carry one (see lib/auth/email.ts).
  *
  * Admin sign-in is a separate credential class entirely (email + password), so
  * nothing here can produce a session that reaches the operations surface.
  */
 
-export type OtpState = {
+export type SignInState = {
   error?: string
   email?: string
   sent?: boolean
 }
 
-const requestSchema = z.object({ email: emailSchema })
+const schema = z.object({
+  email: emailSchema,
+  next: z.string().optional(),
+})
 
-export async function requestOtp(
-  _prev: OtpState,
+export async function requestSignInLink(
+  _prev: SignInState,
   formData: FormData,
-): Promise<OtpState> {
-  const parsed = requestSchema.safeParse({ email: formData.get('email') })
+): Promise<SignInState> {
+  const parsed = schema.safeParse({
+    email: formData.get('email'),
+    next: formData.get('next'),
+  })
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Enter a valid email address.' }
   }
 
-  const email = parsed.data.email
+  const { email } = parsed.data
+  const next = safeNext(parsed.data.next)
 
   let limit
   try {
@@ -45,7 +51,7 @@ export async function requestOtp(
     // Do not disclose infrastructure details or whether an address exists.
     return {
       email,
-      error: 'We could not send the code right now. Please try again shortly.',
+      error: 'We could not send the email right now. Please try again shortly.',
     }
   }
   if (!limit.ok) {
@@ -53,10 +59,10 @@ export async function requestOtp(
       email,
       error:
         limit.scope === 'identifier'
-          ? `Too many codes requested for this address. Try again in ${
+          ? `Too many emails requested for this address. Try again in ${
               limit.retryAfterSeconds >= 3600 ? 'an hour' : 'a minute'
             }.`
-          : 'Too many codes requested from this connection. Try again in an hour.',
+          : 'Too many emails requested from this connection. Try again in an hour.',
     }
   }
 
@@ -64,94 +70,50 @@ export async function requestOtp(
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      // First-time addresses are allowed: signing in is how an account is made
-      // (PRD §6.3 — one customer record, created on first verification).
+      // Signing in is how an account is made (PRD §6.3).
       shouldCreateUser: true,
+      emailRedirectTo: `${await siteOrigin()}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   })
 
   if (error) {
     // Never echo the provider's raw message: it can leak whether an address is
-    // already registered. Say what she should do instead.
+    // already registered, and Supabase's built-in mailer returns its hourly
+    // rate limit as an error here too.
     return {
       email,
       error:
-        'We could not send the code. Check the address, or call us and we will book it by hand.',
+        'We could not send the email. Check the address, or call us and we will book it by hand.',
     }
   }
 
   return { email, sent: true }
 }
 
-const verifySchema = z.object({
-  email: emailSchema,
-  token: otpTokenSchema,
-  next: z.string().optional(),
-})
-
-export async function verifyOtp(_prev: OtpState, formData: FormData): Promise<OtpState> {
-  const parsed = verifySchema.safeParse({
-    email: formData.get('email'),
-    token: formData.get('token'),
-    next: formData.get('next'),
-  })
-  if (!parsed.success) {
-    return {
-      email: String(formData.get('email') ?? ''),
-      sent: true,
-      error: parsed.error.issues[0]?.message ?? 'That code did not look right.',
+/**
+ * The origin to send her back to.
+ *
+ * Read from the request rather than only from NEXT_PUBLIC_SITE_URL, so a
+ * preview deployment confirms back to itself instead of bouncing to production
+ * — where the code_verifier cookie does not exist and the link would fail.
+ */
+async function siteOrigin(): Promise<string> {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '')
+  try {
+    const h = await headers()
+    const host = h.get('host')
+    if (host) {
+      const proto = host.startsWith('localhost') || host.startsWith('127.0.0.1')
+        ? 'http'
+        : 'https'
+      return `${proto}://${host}`
     }
+  } catch {
+    // No request scope.
   }
-
-  const { email, token, next } = parsed.data
-  const supabase = await createClient()
-
-  /**
-   * Two token types, because Supabase issues different ones depending on
-   * whether this address has been seen before:
-   *
-   *   'email'  — a returning customer, from the Magic Link template
-   *   'signup' — a first-time address, from the Confirm signup template
-   *
-   * Which one arrives also depends on the project's "Confirm email" setting,
-   * which is a dashboard toggle rather than anything this code controls. Trying
-   * both means a first booking works the same as a tenth, whatever that toggle
-   * is set to — and getting it wrong looks identical to a wrong code, which is
-   * the worst possible thing to be guessing about on the sign-in screen.
-   */
-  const attempt = await supabase.auth.verifyOtp({ email, token, type: 'email' })
-  const { error } = attempt.error
-    ? await supabase.auth.verifyOtp({ email, token, type: 'signup' })
-    : attempt
-
-  if (error) {
-    return {
-      email,
-      sent: true,
-      error: 'That code was wrong or has expired. Ask for a new one.',
-    }
-  }
-
-  // Creates the customer record on first verification, adopting an existing row
-  // if this address has booked before (PRD §6.3).
-  const { error: customerError } = await supabase.rpc('ac_ensure_customer', {
-    p_consent_version: CONSENT_VERSION,
-  })
-  if (customerError) {
-    return {
-      email,
-      sent: true,
-      error: 'You are signed in, but we could not open your account. Please call us.',
-    }
-  }
-
-  redirect(safeNext(next))
+  return configured ?? 'https://alongco.com'
 }
 
-/**
- * Only same-origin paths. An open redirect on the sign-in step is how a
- * phishing page gets a freshly authenticated customer handed to it.
- */
 function safeNext(next: string | undefined): string {
   if (!next) return '/bookings'
   if (!next.startsWith('/') || next.startsWith('//')) return '/bookings'
