@@ -1,0 +1,154 @@
+<!--
+  Supabase Auth → Authentication → Email Templates → "Magic Link"
+  Paste this whole file into the "Message body" field (toggle to HTML/source
+  mode first — Supabase's editor defaults to a rich-text view that will mangle
+  raw HTML pasted into it).
+
+  Subject heading field, paste exactly:
+    Your AlongCo sign-in code: {{ .Token }}
+
+  Variables used: {{ .Token }} (the 6-digit code), {{ .Email }} (trust cue).
+
+  This is the template Supabase sends on a RETURNING address — one that has
+  signed in before (app/(public)/sign-in/actions.ts verifyOtp tries
+  type:'email' first, which is this template, before falling back to
+  type:'signup'). Same code-first treatment as confirm-signup.html: she is
+  never sent a link to click, only a 6-digit code to type, because that is
+  the only thing the sign-in screen accepts.
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Your AlongCo sign-in code</title>
+<!--[if mso]>
+<style>
+  table { border-collapse: collapse; }
+  .fallback-font { font-family: Georgia, 'Times New Roman', serif !important; }
+</style>
+<![endif]-->
+<style>
+  body, table, td { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  body { margin: 0; padding: 0; width: 100% !important; background-color: #F7F6F2; }
+  img { border: 0; line-height: 100%; outline: none; text-decoration: none; }
+  a { text-decoration: none; }
+
+  @media screen and (max-width: 480px) {
+    .container { width: 100% !important; }
+    .card { padding: 28px 22px !important; }
+    .code { font-size: 30px !important; letter-spacing: 6px !important; }
+    .heading { font-size: 22px !important; }
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#F7F6F2;">
+<div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;">
+  Your AlongCo sign-in code.
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F7F6F2;">
+  <tr>
+    <td align="center" style="padding: 32px 16px;">
+
+      <table role="presentation" class="container" width="480" cellpadding="0" cellspacing="0" border="0" style="width:480px; max-width:480px;">
+
+        <!-- brand bar -->
+        <tr>
+          <td style="height:4px; line-height:4px; font-size:0; background-color:#2E63E8; border-radius:10px 10px 0 0;">&nbsp;</td>
+        </tr>
+
+        <!-- wordmark -->
+        <tr>
+          <td align="center" style="background-color:#FBFAF7; padding:22px 24px 18px; border-left:1px solid #ECEBE6; border-right:1px solid #ECEBE6;">
+            <span style="font-family: 'Courier New', Courier, monospace; font-size:14px; font-weight:700; letter-spacing:4px; color:#16161A;">
+              ALONG&nbsp;&nbsp;CO
+            </span>
+          </td>
+        </tr>
+
+        <!-- card -->
+        <tr>
+          <td class="card" style="background-color:#FFFFFF; padding:36px 40px 32px; border-left:1px solid #ECEBE6; border-right:1px solid #ECEBE6;">
+
+            <p style="margin:0 0 10px; font-family: 'Courier New', Courier, monospace; font-size:10px; font-weight:700; letter-spacing:2px; color:#2E4FA8; text-transform:uppercase;">
+              YOUR SIGN-IN CODE
+            </p>
+
+            <h1 class="heading fallback-font" style="margin:0 0 14px; font-family: Georgia, 'Times New Roman', serif; font-weight:400; font-size:26px; line-height:1.25; color:#16161A;">
+              Welcome back
+            </h1>
+
+            <p style="margin:0 0 26px; font-family: Helvetica, Arial, sans-serif; font-size:14.5px; line-height:1.6; color:#4A4A4F;">
+              Enter this on the AlongCo sign-in screen to continue as
+              <strong style="color:#16161A;">{{ .Email }}</strong>. Your bookings and
+              details are exactly as you left them.
+            </p>
+
+            <!-- the code -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" class="code" style="background-color:#EDF1FD; border:1px solid rgba(46,99,232,0.22); border-radius:10px; padding:20px 12px; font-family: 'Courier New', Courier, monospace; font-size:38px; font-weight:700; letter-spacing:10px; color:#16161A;">
+                  {{ .Token }}
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:22px 0 0; font-family: Helvetica, Arial, sans-serif; font-size:12.5px; line-height:1.6; color:#8A8A8E;">
+              Didn't try to sign in? You can ignore this email — nothing happens on your
+              account without this code.
+            </p>
+
+          </td>
+        </tr>
+
+        <!-- what happens next -->
+        <tr>
+          <td style="background-color:#FFFFFF; padding:0 40px 32px; border-left:1px solid #ECEBE6; border-right:1px solid #ECEBE6;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #ECEBE6; padding-top:20px;">
+              <tr>
+                <td style="font-family: Helvetica, Arial, sans-serif; font-size:12.5px; line-height:1.65; color:#6B6B6F;">
+                  Not you? Someone may have typed your address by mistake — no account
+                  changes happen unless this code is entered.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- footer -->
+        <tr>
+          <td style="background-color:#16161A; padding:26px 40px; border-radius:0 0 10px 10px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family: Helvetica, Arial, sans-serif; font-size:11.5px; line-height:1.7; color:rgba(255,255,255,0.55);">
+                  Questions before you book?
+                  <a href="mailto:grievance@alongco.com" style="color:#9DB4F6;">grievance@alongco.com</a>
+                  <br>
+                  <a href="https://alongco.com/policies/conduct" style="color:#9DB4F6;">Conduct policy</a>
+                  &nbsp;·&nbsp;
+                  <a href="https://alongco.com/policies/refunds" style="color:#9DB4F6;">Refunds</a>
+                  &nbsp;·&nbsp;
+                  <a href="https://alongco.com/policies/privacy" style="color:#9DB4F6;">Privacy</a>
+                  &nbsp;·&nbsp;
+                  <a href="https://alongco.com/policies/terms" style="color:#9DB4F6;">Terms</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-top:14px; font-family: Helvetica, Arial, sans-serif; font-size:10.5px; line-height:1.6; color:rgba(255,255,255,0.32);">
+                  AlongCo · Bangalore · This is an automated message sent because a sign-in
+                  was requested for this address. Replies are not monitored.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+</body>
+</html>

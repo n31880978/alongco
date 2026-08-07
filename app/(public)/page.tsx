@@ -29,69 +29,79 @@ export default async function LandingPage() {
   return (
     <>
       <TrackView event="view_landing" />
-      {/* Hero — booking begins above the fold, over the drifting aurora. */}
+      {/* Hero — booking begins above the fold, over the drifting aurora.
+          At 375px this is the design's single column, top to bottom. From lg
+          it becomes two: the argument on the left, the actual booking widget
+          on the right — using the width for the one thing on this page that
+          is not prose, rather than just growing the prose wider. */}
       <section className="relative overflow-hidden bg-paper">
         <Aurora />
-        <div className="relative px-5 pb-6 pt-4">
-          <div className="mb-[26px] flex items-center justify-between">
-            <Wordmark size={26} />
-            <span className="rounded-full border border-blue/20 bg-white/70 px-2.5 py-[5px] font-mono text-[10px] font-semibold tracking-[0.06em] text-blue-dark backdrop-blur-sm">
-              BANGALORE
-            </span>
-          </div>
-
-          {accepting.length > 0 && (
-            <div className="mb-4 inline-flex animate-rise items-center gap-2 rounded-full border border-ink/10 bg-white/75 py-1.5 pl-[9px] pr-[11px] shadow-[0_2px_10px_rgba(22,22,26,.05)] backdrop-blur-md">
-              <span className="relative h-[7px] w-[7px] shrink-0">
-                <span className="absolute inset-0 rounded-full bg-[#1F9D6B]" />
-                <span className="absolute inset-0 animate-pulse2 rounded-full bg-[#1F9D6B]" />
-              </span>
-              <span className="font-mono text-[10.5px] font-semibold tracking-[0.04em] text-ink">
-                {accepting.length} COMPANION{accepting.length === 1 ? '' : 'S'} TAKING
-                BOOKINGS
+        <div className="relative px-5 pb-6 pt-4 lg:mx-auto lg:grid lg:max-w-[1080px] lg:grid-cols-[1fr_420px] lg:items-center lg:gap-16 lg:px-8 lg:py-14">
+          <div className="lg:col-start-1">
+            <div className="mb-[26px] flex items-center justify-between lg:mb-10">
+              <Wordmark size={26} />
+              <span className="rounded-full border border-blue/20 bg-white/70 px-2.5 py-[5px] font-mono text-[10px] font-semibold tracking-[0.06em] text-blue-dark backdrop-blur-sm">
+                BANGALORE
               </span>
             </div>
-          )}
 
-          {/* The three-line break is the design's, at 375px. From md the lines
-              become spans in a normally-wrapping heading, so a wider screen
-              fills the measure instead of keeping a phone's ragged edge. */}
-          <h1 className="mb-3.5 font-serif text-[36px] font-light leading-[1.08] tracking-[-0.02em] text-ink md:text-[52px] lg:text-[60px]">
-            <span className="block animate-rise [animation-delay:.06s] md:inline">
-              Someone to come{' '}
-            </span>
-            <span className="block animate-rise [animation-delay:.16s] md:inline">
-              along, for an{' '}
-            </span>
-            <span className="block animate-rise [animation-delay:.26s] md:inline">
-              hour.
-            </span>
-          </h1>
+            {accepting.length > 0 && (
+              <div className="mb-4 inline-flex animate-rise items-center gap-2 rounded-full border border-ink/10 bg-white/75 py-1.5 pl-[9px] pr-[11px] shadow-[0_2px_10px_rgba(22,22,26,.05)] backdrop-blur-md">
+                <span className="relative h-[7px] w-[7px] shrink-0">
+                  <span className="absolute inset-0 rounded-full bg-[#1F9D6B]" />
+                  <span className="absolute inset-0 animate-pulse2 rounded-full bg-[#1F9D6B]" />
+                </span>
+                <span className="font-mono text-[10.5px] font-semibold tracking-[0.04em] text-ink">
+                  {accepting.length} COMPANION{accepting.length === 1 ? '' : 'S'} TAKING
+                  BOOKINGS
+                </span>
+              </div>
+            )}
 
-          <p className="mb-5 max-w-[310px] animate-rise font-sans text-[15px] leading-[1.55] text-ink/70 [animation-delay:.34s] [text-wrap:pretty] md:max-w-[46ch] md:text-[17px]">
-            A public place you choose, an hour you booked, and a clear way to end it.{' '}
-            <span className="font-semibold text-ink">
-              {formatPaise(baseRate)} an hour.
-            </span>
-          </p>
-
-          <HeroStrip days={digest} />
-
-          <div className="mt-4 flex animate-rise flex-wrap items-center gap-x-3.5 gap-y-1.5 [animation-delay:.52s]">
-            {[
-              'Public places only',
-              'No romance, at any price',
-              'Total shown before you sign in',
-            ].map((t, i) => (
-              <span key={t} className="contents">
-                {i > 0 && (
-                  <span aria-hidden className="font-sans text-[11px] text-ink/30">
-                    ·
-                  </span>
-                )}
-                <span className="font-sans text-[11px] font-medium text-ink/60">{t}</span>
+            {/* The three-line break is the design's, at 375px. From md the lines
+                become spans in a normally-wrapping heading, so a wider screen
+                fills the measure instead of keeping a phone's ragged edge. */}
+            <h1 className="mb-3.5 font-serif text-[36px] font-light leading-[1.08] tracking-[-0.02em] text-ink md:text-[52px] lg:text-[58px]">
+              <span className="block animate-rise [animation-delay:.06s] md:inline">
+                Someone to come{' '}
               </span>
-            ))}
+              <span className="block animate-rise [animation-delay:.16s] md:inline">
+                along, for an{' '}
+              </span>
+              <span className="block animate-rise [animation-delay:.26s] md:inline">
+                hour.
+              </span>
+            </h1>
+
+            <p className="mb-5 max-w-[310px] animate-rise font-sans text-[15px] leading-[1.55] text-ink/70 [animation-delay:.34s] [text-wrap:pretty] md:max-w-[46ch] md:text-[17px] lg:mb-8">
+              A public place you choose, an hour you booked, and a clear way to end it.{' '}
+              <span className="font-semibold text-ink">
+                {formatPaise(baseRate)} an hour.
+              </span>
+            </p>
+
+            <div className="flex animate-rise flex-wrap items-center gap-x-3.5 gap-y-1.5 [animation-delay:.52s]">
+              {[
+                'Public places only',
+                'No romance, at any price',
+                'Total shown before you sign in',
+              ].map((t, i) => (
+                <span key={t} className="contents">
+                  {i > 0 && (
+                    <span aria-hidden className="font-sans text-[11px] text-ink/30">
+                      ·
+                    </span>
+                  )}
+                  <span className="font-sans text-[11px] font-medium text-ink/60">
+                    {t}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 lg:col-start-2 lg:mt-0">
+            <HeroStrip days={digest} />
           </div>
         </div>
       </section>
