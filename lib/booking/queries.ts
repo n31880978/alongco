@@ -1,6 +1,6 @@
 import 'server-only'
 import { cache } from 'react'
-import { createClient } from '@/lib/supabase/server'
+import { createCustomerClient } from '@/lib/supabase/customer'
 import type { BookingStatus } from '@/lib/supabase/types'
 
 /**
@@ -74,7 +74,7 @@ function shape(row: any): BookingView {
 }
 
 export const getOwnBooking = cache(async (id: string): Promise<BookingView | null> => {
-  const supabase = await createClient()
+  const supabase = createCustomerClient()
   const { data, error } = await supabase
     .from('bookings')
     .select(SELECT)
@@ -90,7 +90,7 @@ export const getOwnBooking = cache(async (id: string): Promise<BookingView | nul
  */
 export const getOwnBookingByReference = cache(
   async (reference: string): Promise<BookingView | null> => {
-    const supabase = await createClient()
+    const supabase = createCustomerClient()
     const { data, error } = await supabase
       .from('bookings')
       .select(SELECT)
@@ -102,7 +102,7 @@ export const getOwnBookingByReference = cache(
 )
 
 export const listOwnBookings = cache(async (): Promise<BookingView[]> => {
-  const supabase = await createClient()
+  const supabase = createCustomerClient()
   const { data, error } = await supabase
     .from('bookings')
     .select(SELECT)

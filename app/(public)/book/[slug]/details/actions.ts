@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createCustomerClient } from '@/lib/supabase/customer'
 import { bookingErrorMessage } from '@/lib/booking/errors'
 
 export type DetailsState = { error?: string }
@@ -59,7 +59,7 @@ export async function saveDetails(
   }
 
   const { slug, bookingId, fullName, phone, areaId, notes } = parsed.data
-  const supabase = await createClient()
+  const supabase = createCustomerClient()
 
   const { error } = await supabase.rpc('ac_set_booking_details', {
     p_booking_id: bookingId,

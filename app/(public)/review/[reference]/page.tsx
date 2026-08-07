@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { PublicHeader } from '@/components/site/header'
 import { getOwnBookingByReference } from '@/lib/booking/queries'
 import { getCurrentCustomer } from '@/lib/auth/session'
-import { createClient } from '@/lib/supabase/server'
+import { createCustomerClient } from '@/lib/supabase/customer'
 import { getSettings } from '@/lib/settings'
 import { formatDateLong, formatSlotLabel } from '@/lib/time/zone'
 import { ReviewForm } from './_components/review-form'
@@ -35,7 +35,7 @@ export default async function ReviewPage({
   const starts = new Date(booking.startsAt)
   const ended = new Date(booking.endsAt).getTime() < Date.now()
 
-  const supabase = await createClient()
+  const supabase = createCustomerClient()
   const { data: existing } = await supabase
     .from('reviews')
     .select('id, rating, is_published')

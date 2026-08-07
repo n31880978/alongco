@@ -1,16 +1,12 @@
 import 'server-only'
 import { createHash } from 'node:crypto'
 import { headers } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
+import { createCustomerClient } from '@/lib/supabase/customer'
 
 /**
- * OTP throttling. PRD §6.3 — rate limited per identity and per IP.
- *
- * Supabase Auth has its own limits, but they are global rather than tunable per
- * project the way this needs to be, so the window is enforced here as well.
- *
- * Nothing stored is reversible to the address (CLAUDE.md §9): only a salted
- * hash goes into otp_requests, and the raw value never reaches a log line.
+ * Salted hashing and client IP, still used by the ADMIN login throttle
+ * (app/(admin)/admin/sign-in/actions.ts). Nothing stored is reversible to the
+ * address (CLAUDE.md §9).
  */
 
 function salt(): string {
@@ -30,30 +26,17 @@ export async function clientIp(): Promise<string> {
   return h.get('x-real-ip') ?? 'unknown'
 }
 
-export type RateLimitResult =
-  | { ok: true }
-  | { ok: false; retryAfterSeconds: number; scope: 'identifier' | 'ip' }
-
-/** `identifier` is the email address sign-in was requested for. */
-export async function checkOtpRateLimit(identifier: string): Promise<RateLimitResult> {
-  const supabase = await createClient()
-  const identifierHash = hashIdentifier(identifier)
-  const ipHash = hashIdentifier(await clientIp())
-  const { data, error } = await supabase.rpc('ac_consume_otp_rate_limit', {
-    p_identifier_hash: identifierHash,
-    p_ip_hash: ipHash,
-  })
-  const row = data?.[0]
-
-  if (error || !row) throw new Error('OTP rate limit check failed')
-  if (row.allowed) return { ok: true }
-
-  return {
-    ok: false,
-    retryAfterSeconds: row.retry_after_seconds,
-    scope: row.scope === 'ip' ? 'ip' : 'identifier',
-  }
-}
+/*
+ * checkOtpRateLimit lived here and is gone.
+ *
+ * Sign-in is Clerk's now, and Clerk throttles its own OTP and password
+ * attempts. Keeping a limiter the sign-in path no longer calls would have been
+ * worse than removing it: it reads as protection that is not actually running.
+ *
+ * The otp_requests table and ac_consume_otp_rate_limit are left in place —
+ * still used by nothing on the customer path, but harmless, and removing a
+ * table is a one-way door on a live database.
+ */
 
 /**
  * Post-authentication throttling for booking holds and reviews. TASKS T21.
@@ -73,7 +56,7 @@ export async function checkActionRateLimit(
   customerId: string,
 ): Promise<ActionLimit> {
   try {
-    const supabase = await createClient()
+    const supabase = createCustomerClient()
     const { data, error } = await supabase.rpc('ac_check_action_rate_limit', {
       p_action: action,
       p_customer_id: customerId,

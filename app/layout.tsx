@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import { SITE_NAME, siteUrl } from '@/lib/seo'
 
@@ -59,11 +60,21 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  /*
+   * ClerkProvider wraps the whole tree, including the admin group. That is
+   * harmless: admin pages never render a Clerk component and never read a Clerk
+   * session — the admin surface authenticates through Supabase email +
+   * password and gates on the admin_users row. Wrapping here rather than only
+   * in the public layout keeps a single provider, which is what Clerk's
+   * client-side session hooks expect.
+   */
   return (
-    <html lang="en-IN" className="bg-paper">
-      <body className="min-h-screen bg-paper font-sans text-ink antialiased">
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en-IN" className="bg-paper">
+        <body className="min-h-screen bg-paper font-sans text-ink antialiased">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

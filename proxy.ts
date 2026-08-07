@@ -1,8 +1,9 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextFetchEvent, type NextRequest } from 'next/server'
+import { clerkMiddleware } from '@clerk/nextjs/server'
 import { updateSession } from '@/lib/supabase/proxy-session'
 
 /**
- * Host routing + session refresh.
+ * Host routing + session handling, for two different auth systems.
  *
  * The route lives in `app/(admin)/admin/*`. On ADMIN_HOST, a bare path is
  * rewritten into that internal prefix, so `admin.alongco.com/bookings` and
@@ -11,8 +12,18 @@ import { updateSession } from '@/lib/supabase/proxy-session'
  *
  * On the public host, `/admin/*` is a hard 404 — CLAUDE.md §9: refuse, do not
  * redirect to a login that would accept a customer.
+ *
+ * The two auth systems are handled separately and never overlap:
+ *
+ *   admin host  -> Supabase cookie refresh only. Clerk is not involved at all,
+ *                  which is what keeps a customer's Clerk session from being a
+ *                  credential the admin surface has ever heard of (§9).
+ *   public host -> Clerk owns the session. Supabase gets the Clerk token per
+ *                  request via lib/supabase/customer.ts, so there is no
+ *                  Supabase cookie to refresh here.
  */
-export async function proxy(request: NextRequest) {
+
+function isAdminRequest(request: NextRequest) {
   const host = (request.headers.get('host') ?? '').split(':')[0].toLowerCase()
   const adminHost = (process.env.ADMIN_HOST ?? 'admin.alongco.com')
     .split(':')[0]
@@ -22,6 +33,20 @@ export async function proxy(request: NextRequest) {
   const isAdminHost = host === adminHost
   // Localhost has no second hostname to route on, so the prefix is the switch.
   const isLocal = host === 'localhost' || host === '127.0.0.1'
+
+  return {
+    isAdminHost,
+    isLocal,
+    pathname,
+    // What the request is ultimately for, whichever host it arrived on.
+    targetsAdmin: isAdminHost || pathname.startsWith('/admin'),
+  }
+}
+
+const clerk = clerkMiddleware()
+
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
+  const { isAdminHost, isLocal, pathname, targetsAdmin } = isAdminRequest(request)
 
   if (!isAdminHost && !isLocal && pathname.startsWith('/admin')) {
     return new NextResponse(null, { status: 404 })
@@ -36,8 +61,13 @@ export async function proxy(request: NextRequest) {
     return updateSession(request, url)
   }
 
-  // Refreshes the Supabase auth cookie so server components see a live session.
-  return updateSession(request)
+  // Admin keeps the Supabase cookie session.
+  if (targetsAdmin) {
+    return updateSession(request)
+  }
+
+  // Everything customer-facing runs through Clerk.
+  return clerk(request, event)
 }
 
 export const config = {

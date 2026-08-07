@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createCustomerClient } from '@/lib/supabase/customer'
 import { getCurrentCustomer } from '@/lib/auth/session'
 import { checkActionRateLimit } from '@/lib/auth/rate-limit'
 import { getSettings } from '@/lib/settings'
@@ -58,7 +58,7 @@ export async function holdSlot(_prev: HoldState, formData: FormData): Promise<Ho
   if (!limit.ok) return { error: limit.reason }
 
   const settings = await getSettings()
-  const supabase = await createClient()
+  const supabase = createCustomerClient()
 
   const { data, error } = await supabase.rpc('create_booking_hold', {
     p_companion_slug: slug,

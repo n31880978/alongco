@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createCustomerClient } from '@/lib/supabase/customer'
 import { getCurrentCustomer } from '@/lib/auth/session'
 import { checkActionRateLimit } from '@/lib/auth/rate-limit'
 
@@ -46,7 +46,7 @@ export async function submitReview(
   const limit = await checkActionRateLimit('review', customer.id)
   if (!limit.ok) return { error: limit.reason }
 
-  const supabase = await createClient()
+  const supabase = createCustomerClient()
 
   const { data: booking } = await supabase
     .from('bookings')
