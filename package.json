@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:reset": "./scripts/db-reset.sh",
+    "db:schema-reset": "./scripts/db-schema-reset.sh",
     "db:test": "vitest run tests/db",
     "admin:create": "node scripts/create-admin.mjs"
   },
