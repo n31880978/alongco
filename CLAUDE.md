@@ -19,7 +19,7 @@ breaking one produces either a legal problem, a double-booked customer, or a los
 | Storage | Supabase Storage — `companion-photos` (public), `companion-docs` (private) |
 | Payments | Razorpay Standard Checkout. Integer paise end to end |
 | Messaging | WhatsApp Business **app**, sent manually by an admin. No API integration in v1. |
-| Hosting | Vercel + Vercel Cron |
+| Hosting | Vercel. Scheduled jobs run in Postgres via `pg_cron`, not Vercel Cron |
 | Analytics | Google Analytics |
 
 Use the Supabase **transaction pooler** connection string. Serverless functions exhaust
@@ -202,8 +202,17 @@ ADMIN_HOST=admin.alongco.com
 
 | Route | Schedule | Job |
 |---|---|---|
-| `/api/cron/expire-holds` | every minute | `pending_payment` past `hold_expires_at` → `expired` |
-| `/api/cron/complete-bookings` | hourly | `confirmed` past `ends_at` → `completed` |
+| `ac-expire-holds` (pg_cron) | every minute | `pending_payment` past `hold_expires_at` → `expired` |
+| `ac-complete-bookings` (pg_cron) | hourly | `confirmed` past `ends_at` → `completed` |
+
+Scheduled in `supabase/migrations/0014_pg_cron_schedules.sql`. Vercel Cron is **not**
+used: the Hobby plan caps invocation at once per day, and expire-holds must run every
+minute because a hold lasts ten. Both jobs are single SQL calls, so running them inside
+Postgres removes the hostname, the shared secret and the plan limit at once — and means
+scheduling survives a change of hosting provider.
+
+The `/api/cron/*` routes still exist for triggering a run by hand, and still verify
+`CRON_SECRET`.
 
 Both verify `CRON_SECRET` before doing anything.
 
