@@ -15,7 +15,7 @@ breaking one produces either a legal problem, a double-booked customer, or a los
 | Framework | Next.js (App Router), TypeScript, React Server Components by default |
 | Styling | Tailwind CSS + shadcn/ui |
 | Database | Supabase Postgres (RLS on every table) |
-| Auth | Supabase Auth. Customers: email OTP (6-digit code). Admins: email + password |
+| Auth | clerk. Customers: email OTP (6-digit code). Admins: email + password (create it and give it to me) |
 | Storage | Supabase Storage — `companion-photos` (public), `companion-docs` (private) |
 | Payments | Razorpay Standard Checkout. Integer paise end to end |
 | Messaging | WhatsApp Business **app**, sent manually by an admin. No API integration in v1. |
