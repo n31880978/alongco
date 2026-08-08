@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { SITE_NAME, siteUrl } from '@/lib/seo'
 
@@ -73,6 +74,7 @@ export default function RootLayout({
       <html lang="en-IN" className="bg-paper">
         <body className="min-h-screen bg-paper font-sans text-ink antialiased">
           {children}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
