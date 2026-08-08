@@ -65,7 +65,7 @@ function clerkHandler(): NextMiddleware {
   return clerk
 }
 
-export async function middleware(request: NextRequest, event: NextFetchEvent) {
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const { isAdminHost, isLocal, pathname, targetsAdmin } = isAdminRequest(request)
 
   if (!isAdminHost && !isLocal && pathname.startsWith('/admin')) {
