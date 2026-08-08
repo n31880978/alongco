@@ -6,7 +6,7 @@ import { getOwnBooking, isHoldLive } from '@/lib/booking/queries'
 import { getCurrentCustomer } from '@/lib/auth/session'
 import { getCompanion } from '@/lib/companions'
 import { formatPaise } from '@/lib/booking/pricing'
-import { maskEmail } from '@/lib/auth/email'
+import { maskEmail } from '@/lib/utils'
 import { HoldExpired } from '../_components/hold-expired'
 import { DetailsForm } from './_components/details-form'
 

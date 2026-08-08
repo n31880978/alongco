@@ -167,7 +167,8 @@ drop function if exists ac_ensure_customer(text);
 create or replace function ac_ensure_customer(
   p_subject         text,
   p_email           text,
-  p_consent_version text default null
+  p_full_name       text    default null,
+  p_consent_version text    default null
 )
 returns uuid
 language plpgsql volatile
@@ -175,6 +176,7 @@ set search_path = public
 as $$
 declare
   v_email text := lower(nullif(btrim(p_email), ''));
+  v_name  text := nullif(btrim(coalesce(p_full_name, '')), '');
   v_id    uuid;
 begin
   if nullif(btrim(coalesce(p_subject, '')), '') is null then
@@ -189,6 +191,12 @@ begin
     update customers set email = v_email
      where id = v_id and email is distinct from v_email;
 
+    -- Only ever fills a blank. Never replaces a name she has given.
+    if v_name is not null then
+      update customers set full_name = v_name
+       where id = v_id and nullif(btrim(coalesce(full_name, '')), '') is null;
+    end if;
+
     if p_consent_version is not null then
       update customers
          set consent_version = p_consent_version,
@@ -198,16 +206,24 @@ begin
     return v_id;
   end if;
 
-  -- Same address returning under a new identity provider: adopt the existing
-  -- record rather than orphaning her booking history.
+  -- Same address returning under a new identity provider — she signed up with
+  -- an emailed code and comes back through Google, or the reverse. Adopt the
+  -- existing record rather than orphaning her booking history.
+  --
+  -- This is the line that makes the verified-email check in the application a
+  -- security boundary rather than a nicety.
   select id into v_id from customers where lower(email) = v_email;
   if found then
     update customers set auth_user_id = p_subject where id = v_id;
+    if v_name is not null then
+      update customers set full_name = v_name
+       where id = v_id and nullif(btrim(coalesce(full_name, '')), '') is null;
+    end if;
     return v_id;
   end if;
 
-  insert into customers (auth_user_id, email, consent_version, consent_at)
-  values (p_subject, v_email, p_consent_version,
+  insert into customers (auth_user_id, email, full_name, consent_version, consent_at)
+  values (p_subject, v_email, v_name, p_consent_version,
           case when p_consent_version is null then null else now() end)
   returning id into v_id;
 
@@ -215,9 +231,9 @@ begin
 end;
 $$;
 
-revoke execute on function ac_ensure_customer(text, text, text)
+revoke execute on function ac_ensure_customer(text, text, text, text)
   from public, anon, authenticated;
-grant  execute on function ac_ensure_customer(text, text, text) to service_role;
+grant  execute on function ac_ensure_customer(text, text, text, text) to service_role;
 
 -- ---------------------------------------------------------------------------
 -- The three booking functions. Same logic, text subject.

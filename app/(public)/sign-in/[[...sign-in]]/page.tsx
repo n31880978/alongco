@@ -45,9 +45,8 @@ export default async function SignInPage({
           Sign in to book
         </h1>
         <p className="font-sans text-[12.5px] leading-[1.5] text-ink/60">
-          We ask for your phone number at the next step — that is how your booking
-          confirmation reaches you on WhatsApp, and how we reach you if something
-          changes.
+          Sign in with your email or Google account. Your phone number for WhatsApp
+          confirmation is collected at the booking step.
         </p>
       </section>
 

@@ -96,7 +96,7 @@ describe('row level security', () => {
     })
 
     it('cannot read customers, incidents or the audit log', async () => {
-      for (const table of ['customers', 'incidents', 'admin_audit_log', 'admin_users', 'otp_requests']) {
+      for (const table of ['customers', 'incidents', 'admin_audit_log', 'admin_users']) {
         const rows = await asRole('anon', null, (c) =>
           c.query(`select * from ${table}`).then((r) => r.rows),
         )

@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
-import { getCurrentCustomer } from '@/lib/auth/session'
+import { requireCustomer } from '@/lib/auth/session'
 import { getSettings } from '@/lib/settings'
 import { createOrder } from '@/lib/payments/razorpay/orders'
 import { ACTIVE_PROVIDER } from '@/lib/payments/provider'
@@ -57,7 +57,7 @@ export async function startPayment(
 
   const { bookingId, termsVersion } = parsed.data
 
-  const customer = await getCurrentCustomer()
+  const customer = await requireCustomer()
   if (!customer) return { error: bookingErrorMessage('AC_NOT_AUTHENTICATED') }
 
   const booking = await getOwnBooking(bookingId)

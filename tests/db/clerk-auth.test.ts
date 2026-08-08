@@ -171,7 +171,7 @@ describe('RLS with a Clerk subject', () => {
 describe('ac_ensure_customer', () => {
   it('creates a customer against a Clerk subject', async () => {
     const [{ id }] = await query<{ id: string }>(
-      `select ac_ensure_customer($1, $2, $3) as id`,
+      `select ac_ensure_customer($1, $2, null, $3) as id`,
       [CLERK_SUB, 'Ananya@Example.com', '2026-08-01'],
     )
     expect(id).toBeTruthy()

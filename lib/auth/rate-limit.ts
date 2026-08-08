@@ -26,18 +26,6 @@ export async function clientIp(): Promise<string> {
   return h.get('x-real-ip') ?? 'unknown'
 }
 
-/*
- * checkOtpRateLimit lived here and is gone.
- *
- * Sign-in is Clerk's now, and Clerk throttles its own OTP and password
- * attempts. Keeping a limiter the sign-in path no longer calls would have been
- * worse than removing it: it reads as protection that is not actually running.
- *
- * The otp_requests table and ac_consume_otp_rate_limit are left in place —
- * still used by nothing on the customer path, but harmless, and removing a
- * table is a one-way door on a live database.
- */
-
 /**
  * Post-authentication throttling for booking holds and reviews. TASKS T21.
  *

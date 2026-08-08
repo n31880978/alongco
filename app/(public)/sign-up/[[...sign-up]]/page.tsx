@@ -32,8 +32,8 @@ export default async function SignUpPage({
           Create your account
         </h1>
         <p className="font-sans text-[12.5px] leading-[1.5] text-ink/60">
-          We ask for the minimum a booking needs. Your phone number comes at the
-          next step, so we can confirm on WhatsApp.
+          Sign up with your email or Google account. Your phone number for WhatsApp
+          confirmation is collected at the booking step.
         </p>
       </section>
 

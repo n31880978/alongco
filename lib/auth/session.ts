@@ -4,6 +4,7 @@ import { auth, currentUser } from '@clerk/nextjs/server'
 import { createCustomerClient } from '@/lib/supabase/customer'
 import { createServiceClient } from '@/lib/supabase/service'
 import { CONSENT_VERSION } from '@/lib/booking/terms'
+import { report } from '@/lib/observability/report'
 import type { Customer } from '@/lib/supabase/types'
 
 /**
@@ -65,9 +66,16 @@ export async function ensureCustomer(): Promise<Customer | null> {
   const { error } = await service.rpc('ac_ensure_customer', {
     p_subject: subject,
     p_email: email,
+    p_full_name: user.firstName ? `${user.firstName} ${user.lastName ?? ''}`.trim() : null,
     p_consent_version: CONSENT_VERSION,
   })
-  if (error) return null
+  if (error) {
+    report('auth', 'ac_ensure_customer failed', {
+      severity: 'error',
+      context: { code: (error as { code?: string }).code },
+    })
+    return null
+  }
 
   const { data } = await service
     .from('customers')

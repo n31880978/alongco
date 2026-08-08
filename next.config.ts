@@ -34,6 +34,28 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
           },
+          {
+            // CSP for the payment flow.
+            // - script-src: own origin + Razorpay Checkout.js + Clerk hosted JS
+            //   + unsafe-inline needed by Next.js inline scripts (nonce-based
+            //   CSP would require a custom Document; this is the pragmatic floor).
+            // - frame-src: Razorpay checkout iframe + Clerk auth flows.
+            // - img-src: own origin + data URIs (QR codes) + Supabase storage.
+            // - connect-src: own origin + Supabase API + Clerk API + Razorpay.
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.clerk.accounts.dev https://clerk.alongco.com",
+              "style-src 'self' 'unsafe-inline'",
+              "frame-src https://api.razorpay.com https://*.clerk.accounts.dev https://clerk.alongco.com",
+              "img-src 'self' data: blob: https://*.supabase.co",
+              "connect-src 'self' https://*.supabase.co https://api.razorpay.com https://*.clerk.com https://*.clerk.dev",
+              "font-src 'self' data:",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
+          },
         ],
       },
       {

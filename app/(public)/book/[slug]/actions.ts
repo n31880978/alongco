@@ -3,7 +3,7 @@
 import { z } from 'zod'
 import { redirect } from 'next/navigation'
 import { createCustomerClient } from '@/lib/supabase/customer'
-import { getCurrentCustomer } from '@/lib/auth/session'
+import { requireCustomer } from '@/lib/auth/session'
 import { checkActionRateLimit } from '@/lib/auth/rate-limit'
 import { getSettings } from '@/lib/settings'
 import { bookingErrorMessage, shouldRefreshSlots } from '@/lib/booking/errors'
@@ -45,7 +45,8 @@ export async function holdSlot(_prev: HoldState, formData: FormData): Promise<Ho
 
   // Every hold must have an owner (PRD §6.3), so authentication comes first.
   // The selection rides along in `next` so she lands back on the same choice.
-  const customer = await getCurrentCustomer()
+  // requireCustomer also creates the Supabase record for first-time Google sign-ins.
+  const customer = await requireCustomer()
   if (!customer) {
     const back = `/book/${slug}?m=${durationMinutes}&t=${encodeURIComponent(startsAt)}`
     redirect(`/sign-in?next=${encodeURIComponent(back)}`)

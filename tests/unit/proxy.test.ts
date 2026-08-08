@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest, type NextFetchEvent } from 'next/server'
-import { proxy } from '@/proxy'
+import { proxy } from '../../proxy'
 
 /**
  * Clerk's middleware takes the fetch event so it can waitUntil. Nothing under
