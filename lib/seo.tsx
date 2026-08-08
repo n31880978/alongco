@@ -7,11 +7,40 @@
 export const SITE_NAME = 'AlongCo'
 export const SITE_TAGLINE = 'meaningful company, on your terms'
 
-/** Canonical origin, never with a trailing slash. */
+const FALLBACK_ORIGIN = 'https://www.alongco.com'
+
+/**
+ * Canonical origin, never with a trailing slash, and guaranteed parseable.
+ *
+ * This is deliberately defensive, because the failure it prevents is total.
+ * `app/layout.tsx` does `metadataBase: new URL(siteUrl())` at module scope, and
+ * `new URL('alongco.com')` throws — a scheme-less value in the environment
+ * therefore takes down every route in the app-router module graph, including
+ * robots.txt and sitemap.xml, while leaving bare route handlers alive. A
+ * misconfigured environment variable should degrade to the right default, not
+ * return 500 for the whole site.
+ *
+ * Rules, in order:
+ *   · empty or unset      -> the known-good default
+ *   · missing scheme      -> https:// prepended, so "alongco.com" works
+ *   · still unparseable   -> the known-good default
+ *
+ * The default is the www host on purpose: the apex 308-redirects to www, so
+ * emitting apex URLs in canonicals, sitemaps and payment return URLs would
+ * point every one of them at a redirect.
+ */
 export function siteUrl(): string {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim()
-  if (!raw) return 'https://alongco.com'
-  return raw.replace(/\/+$/, '')
+  if (!raw) return FALLBACK_ORIGIN
+
+  const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`
+  try {
+    const url = new URL(candidate)
+    // Origin drops any path, query or trailing slash for us.
+    return url.origin
+  } catch {
+    return FALLBACK_ORIGIN
+  }
 }
 
 export function absoluteUrl(path: string): string {
