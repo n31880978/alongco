@@ -4,12 +4,8 @@ import { Wordmark } from '@/components/brand/mark'
 import { Button } from '@/components/ui/button'
 import { listCompanions } from '@/lib/companions'
 import { getSettings } from '@/lib/settings'
-import { formatPaise, quote } from '@/lib/booking/pricing'
 import { TrackView } from '@/components/analytics/ga'
 import { JsonLd, organisationJsonLd } from '@/lib/seo'
-// Restore with the hero strip — see the comment beside the call to action.
-// import { getAvailabilityDigest } from '@/lib/companions'
-// import { HeroStrip } from './_components/hero-strip'
 
 export const revalidate = 300
 
@@ -17,30 +13,12 @@ export default async function LandingPage() {
   const [companions, settings] = await Promise.all([listCompanions(), getSettings()])
   const accepting = companions.filter((c) => c.isAccepting)
 
-  // Computed availability for every listed companion, which is real work on the
-  // highest-traffic page. Only the hero strip used it, so it is not run.
-  // Restore alongside the strip:
-  // const digest = await getAvailabilityDigest(accepting, {
-  //   durationMinutes: settings.minDurationMinutes,
-  // })
-
-  const baseRate = accepting.length
-    ? Math.min(...accepting.map((c) => c.hourlyRatePaise))
-    : 49900
-
-  const prices = [60, 120, 180].map((minutes) => ({
-    minutes,
-    ...quote(baseRate, minutes, settings.durationDiscounts),
-  }))
-
   return (
     <>
       <TrackView event="view_landing" />
       <JsonLd data={organisationJsonLd()} />
-      {/* Hero — over the drifting aurora.
-          At 375px this is the design's single column, top to bottom. From lg
-          the copy is centred on a single measure rather than split into two
-          columns, because the right-hand column no longer holds a widget. */}
+
+      {/* Hero */}
       <section className="relative overflow-hidden bg-paper">
         <Aurora />
         <div className="relative px-5 pb-6 pt-4 lg:mx-auto lg:max-w-[820px] lg:px-8 lg:py-16 lg:text-center">
@@ -65,9 +43,6 @@ export default async function LandingPage() {
               </div>
             )}
 
-            {/* The three-line break is the design's, at 375px. From md the lines
-                become spans in a normally-wrapping heading, so a wider screen
-                fills the measure instead of keeping a phone's ragged edge. */}
             <h1 className="mb-3.5 font-serif text-[36px] font-light leading-[1.08] tracking-[-0.02em] text-ink md:text-[52px] lg:text-[58px]">
               <span className="block animate-rise [animation-delay:.06s] md:inline">
                 Someone to come{' '}
@@ -81,52 +56,25 @@ export default async function LandingPage() {
             </h1>
 
             <p className="mb-5 max-w-[310px] animate-rise font-sans text-[15px] leading-[1.55] text-ink/70 [animation-delay:.34s] [text-wrap:pretty] md:max-w-[46ch] md:text-[17px] lg:mx-auto lg:mb-8 lg:max-w-[54ch] lg:text-[18px]">
-              A public place you choose, an hour you booked, and a clear way to end it.{' '}
-              <span className="font-semibold text-ink">
-                {formatPaise(baseRate)} an hour.
-              </span>
+              A public place you choose, an hour you booked, and a clear way to end it.
             </p>
 
-            {/*
-              The direct call to action.
-
-              This replaces the interactive day/time strip that used to sit
-              here — the widget itself is still built and tested
-              (app/(public)/_components/hero-strip.tsx), and the block below
-              restores it in one edit. Two things are worth knowing before
-              putting it back:
-
-                · The strip asked her to choose a day and a time before she had
-                  seen a single companion, which is the wrong order for a
-                  decision that PRD §4 describes as a safety judgement rather
-                  than a purchase. Browsing first, then picking a time, matches
-                  how she actually decides.
-                · It also duplicated the slot picker she meets two screens
-                  later, so the same choice was made twice.
-
-              To restore: delete this Button and uncomment the block under it.
-            */}
-            <div className="animate-rise [animation-delay:.44s]">
+            <div className="animate-rise [animation-delay:.44s] flex flex-col gap-3 lg:flex-row lg:justify-center">
               <Button asChild size="lg" sheen className="w-full lg:w-auto lg:px-10">
                 <Link href="/companions">
-                  {accepting.length > 0
-                    ? 'See who is free this week'
-                    : 'Browse companions'}
+                  {accepting.length > 0 ? 'See who is free this week' : 'Browse companions'}
                 </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="w-full lg:w-auto">
+                <Link href="/booking">Check your booking →</Link>
               </Button>
             </div>
 
-            {/*
-              <div className="mt-4">
-                <HeroStrip days={digest} />
-              </div>
-            */}
-
-            <div className="mt-5 flex animate-rise flex-wrap items-center gap-x-3.5 gap-y-1.5 [animation-delay:.52s] lg:justify-center">
+            <div className="mt-5 flex animate-rise flex-wrap items-center gap-x-3.5 gap-y-1.5 [animation-delay:.60s] lg:justify-center">
               {[
                 'Public places only',
                 'No romance, at any price',
-                'Total shown before you sign in',
+                'Price shown before you sign in',
               ].map((t, i) => (
                 <span key={t} className="contents">
                   {i > 0 && (
@@ -134,9 +82,7 @@ export default async function LandingPage() {
                       ·
                     </span>
                   )}
-                  <span className="font-sans text-[11px] font-medium text-ink/60">
-                    {t}
-                  </span>
+                  <span className="font-sans text-[11px] font-medium text-ink/60">{t}</span>
                 </span>
               ))}
             </div>
@@ -144,7 +90,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* What it is / is not — the confidence argument, in order. */}
+      {/* What it is / is not */}
       <section
         className="border-t border-blue/15 bg-blue-tint px-5 py-6"
         style={{
@@ -214,7 +160,7 @@ export default async function LandingPage() {
               n: '02',
               rose: false,
               title: 'Pick a time and a place',
-              body: `Any free slot in the next ${settings.bookingWindowDays} days. You choose which of the three areas you meet in.`,
+              body: `Any free slot in the next ${settings.bookingWindowDays} days. You choose which of the areas you meet in.`,
             },
             {
               n: '03',
@@ -235,54 +181,16 @@ export default async function LandingPage() {
                 <div className="mb-[3px] font-sans text-[14.5px] font-semibold leading-[1.3] text-ink">
                   {s.title}
                 </div>
-                <p className="font-sans text-[13.5px] leading-[1.5] text-ink/60">
-                  {s.body}
-                </p>
+                <p className="font-sans text-[13.5px] leading-[1.5] text-ink/60">{s.body}</p>
               </div>
             </li>
           ))}
         </ol>
-      </section>
 
-      {/* What it costs */}
-      <section className="border-t border-ink/10 bg-paper px-5 pb-[26px] pt-6">
-        <div className="overflow-hidden rounded-[9px] border border-blue/20 bg-white shadow-[0_2px_10px_rgba(46,99,232,.08)]">
-          <div className="h-[3px] bg-[linear-gradient(90deg,#2E63E8,#F76D8A)]" />
-          <div className="border-b border-ink/10 bg-[#F7F9FE] px-4 pb-[11px] pt-3.5 font-mono text-[9.5px] font-semibold tracking-[0.13em] text-blue-dark">
-            WHAT IT COSTS
-          </div>
-          {prices.map((p, i) => (
-            <div
-              key={p.minutes}
-              className={`flex items-baseline justify-between px-4 py-[13px] ${
-                i < prices.length - 1 ? 'border-b border-ink/[.07]' : ''
-              }`}
-            >
-              <span className="font-sans text-[14px] text-ink">
-                {p.minutes === 60
-                  ? 'One hour'
-                  : p.minutes === 120
-                    ? 'Two hours'
-                    : 'Three hours or more'}
-                {p.discountPercent > 0 && (
-                  <span className="ml-0.5 rounded-[3px] bg-rose-tint px-[5px] py-[3px] font-mono text-[10px] font-semibold text-rose-deep">
-                    −{p.discountPercent}%
-                  </span>
-                )}
-              </span>
-              <span className="font-mono text-[15px] font-semibold text-ink">
-                {formatPaise(p.amountPaise)}
-              </span>
-            </div>
-          ))}
-          <p className="border-t border-rose/20 bg-rose-tint px-4 pb-3.5 pt-3 font-sans text-[12.5px] leading-[1.5] text-ink/70">
-            Full amount at checkout. Cancel 48 hours ahead for a full refund, 24 to 48
-            hours for half. No refund inside 24 hours.
-          </p>
-        </div>
-
-        <Button asChild size="lg" sheen className="mt-5 w-full">
-          <Link href="/companions">See who is free</Link>
+        <Button asChild size="lg" sheen className="mt-6 w-full">
+          <Link href="/companions">
+            {accepting.length > 0 ? 'See who is free this week' : 'Browse companions'}
+          </Link>
         </Button>
       </section>
     </>
@@ -301,9 +209,7 @@ function SectionLabel({
   return (
     <div className="mb-[13px] flex items-center gap-2">
       <span aria-hidden className="h-0.5 w-3.5" style={{ background: colour }} />
-      <span
-        className={`font-mono text-[9.5px] font-semibold tracking-[0.13em] ${tone}`}
-      >
+      <span className={`font-mono text-[9.5px] font-semibold tracking-[0.13em] ${tone}`}>
         {children}
       </span>
     </div>

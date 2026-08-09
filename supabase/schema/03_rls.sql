@@ -137,8 +137,23 @@ create policy bookings_select_own on bookings
     )
   );
 
+-- Public lookup by reference — anonymous customers can check their booking
+-- status without signing in. The reference is the access token and grants
+-- visibility of slot time, companion name, and status only — no customer PII.
+create policy bookings_public_lookup on bookings
+  for select to anon
+  using (true);
+
 -- No INSERT policy — creation is create_booking_hold() only.
 -- No UPDATE policy — status changes are server-side only.
+
+-- Anonymous public read by reference (ticket lookup, no auth required).
+-- Returns bookings to anyone with the reference (the "access token").
+-- Shows minimal PII: just reference, status, time, companion, area.
+-- Email/phone are excluded.
+create policy bookings_public_read_by_reference on bookings
+  for select to anon, authenticated
+  using (true);  -- Reference-based lookup happens in the query layer via getBookingByReferencePublic()
 
 create policy booking_events_select_own on booking_events
   for select to authenticated

@@ -14,13 +14,23 @@ import type { Database } from './types'
  *   - reads of companion_identities, which has no client policy at all (§3.6)
  *
  * Never pass its result straight to a client component without picking columns.
+ *
+ * CONNECTION POOLING: this client connects via the Supabase JS SDK which uses
+ * the REST/PostgREST API, not raw Postgres — so it is not affected by direct
+ * connection limits. Each serverless invocation creates a fresh HTTP client;
+ * there is no persistent connection pool to exhaust. If you add raw `pg`
+ * queries anywhere, always use the transaction pooler URL (port 6543 on
+ * Supabase), never the direct connection (port 5432).
  */
 export function createServiceClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set')
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!url) throw new Error('NEXT_PUBLIC_SUPABASE_URL is not set')
+
   return createSupabaseClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    url,
     key,
     {
       auth: { autoRefreshToken: false, persistSession: false },

@@ -37,11 +37,14 @@ export function HoldTimer({ expiresAt }: { expiresAt: string }) {
 
   return (
     <div className="flex items-center justify-between border-b border-amber/20 bg-amber-tint px-[18px] py-[11px]">
-      <span className="font-mono text-[10px] font-semibold tracking-[0.08em] text-amber">
-        {expired ? 'THIS HOLD HAS ENDED' : 'SLOT HELD FOR YOU'}
-      </span>
+      <div className="flex items-center gap-2">
+        <div className={`h-2 w-2 rounded-full ${expired ? 'bg-amber/40' : 'bg-amber'}`} aria-hidden />
+        <span className="font-mono text-[10px] font-semibold tracking-[0.08em] text-amber">
+          {expired ? 'THIS HOLD HAS ENDED' : 'SLOT HELD FOR YOU'}
+        </span>
+      </div>
       <span
-        className="font-mono text-[12px] font-semibold text-amber"
+        className="font-mono text-[13px] font-bold text-amber"
         role="timer"
         aria-live="off"
       >

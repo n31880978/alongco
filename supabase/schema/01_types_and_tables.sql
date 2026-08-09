@@ -305,6 +305,12 @@ create index idx_bookings_pending_hold_expiry
   on bookings (hold_expires_at)
   where status = 'pending_payment';
 
+-- Hold-cap check in create_booking_hold: count live holds per customer.
+-- Covers: WHERE customer_id = ? AND status = 'pending_payment' AND hold_expires_at > now()
+create index idx_bookings_pending_customer
+  on bookings (customer_id, hold_expires_at)
+  where status = 'pending_payment';
+
 -- Cron: find confirmed bookings to complete.
 create index idx_bookings_confirmed_ends
   on bookings (ends_at)
@@ -396,6 +402,7 @@ create table refunds (
   tier_applied      text,                          -- settings code e.g. '48h_full'
   initiated_by      uuid,
   notes             text,
+  proof_url         text,                          -- screenshot URL for manual refund confirmation
   created_at        timestamptz  not null default now(),
   settled_at        timestamptz
 );

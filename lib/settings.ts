@@ -1,4 +1,5 @@
 import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
 import type { DurationDiscount } from '@/lib/booking/pricing'
 
@@ -53,38 +54,54 @@ export const SETTINGS_DEFAULTS: Settings = {
 
 /** Deduplicated per request. */
 export const getSettings = cache(async (): Promise<Settings> => {
-  try {
-    const supabase = createPublicClient()
-    if (!supabase) return SETTINGS_DEFAULTS
-
-    const { data, error } = await supabase.from('settings').select('key, value')
-    if (error || !data) return SETTINGS_DEFAULTS
-
-    const map = new Map(data.map((r) => [r.key, r.value]))
-    const read = <T>(key: string, fallback: T): T =>
-      map.has(key) ? (map.get(key) as T) : fallback
-
-    return {
-      bookingWindowDays: read('booking_window_days', SETTINGS_DEFAULTS.bookingWindowDays),
-      bufferMinutes: read('buffer_minutes', SETTINGS_DEFAULTS.bufferMinutes),
-      minDurationMinutes: read('min_duration_minutes', SETTINGS_DEFAULTS.minDurationMinutes),
-      holdMinutes: read('hold_minutes', SETTINGS_DEFAULTS.holdMinutes),
-      serviceHours: read('service_hours', SETTINGS_DEFAULTS.serviceHours),
-      timezone: read('timezone', SETTINGS_DEFAULTS.timezone),
-      durationDiscounts: read('duration_discounts', SETTINGS_DEFAULTS.durationDiscounts),
-      refundTiers: read('refund_tiers', SETTINGS_DEFAULTS.refundTiers),
-      termsVersion: read('terms_version', SETTINGS_DEFAULTS.termsVersion),
-      confirmationSlaMinutes: read(
-        'confirmation_sla_minutes',
-        SETTINGS_DEFAULTS.confirmationSlaMinutes,
-      ),
-      grievanceContact: read('grievance_contact', SETTINGS_DEFAULTS.grievanceContact),
-    }
-  } catch {
-    // Env not wired yet. The public pages still need to render.
-    return SETTINGS_DEFAULTS
-  }
+  return fetchSettings()
 })
+
+/**
+ * Cross-request cache: settings are read from the DB at most once per 60 s
+ * across all concurrent serverless invocations. React `cache()` deduplicates
+ * within a single request; `unstable_cache` deduplicates across requests on
+ * the same Vercel instance and between cold starts on the same region.
+ *
+ * TTL of 60 s means a settings change (e.g. new terms_version) is live within
+ * a minute everywhere without a redeploy.
+ */
+const fetchSettings = unstable_cache(
+  async (): Promise<Settings> => {
+    try {
+      const supabase = createPublicClient()
+      if (!supabase) return SETTINGS_DEFAULTS
+
+      const { data, error } = await supabase.from('settings').select('key, value')
+      if (error || !data) return SETTINGS_DEFAULTS
+
+      const map = new Map(data.map((r) => [r.key, r.value]))
+      const read = <T>(key: string, fallback: T): T =>
+        map.has(key) ? (map.get(key) as T) : fallback
+
+      return {
+        bookingWindowDays: read('booking_window_days', SETTINGS_DEFAULTS.bookingWindowDays),
+        bufferMinutes: read('buffer_minutes', SETTINGS_DEFAULTS.bufferMinutes),
+        minDurationMinutes: read('min_duration_minutes', SETTINGS_DEFAULTS.minDurationMinutes),
+        holdMinutes: read('hold_minutes', SETTINGS_DEFAULTS.holdMinutes),
+        serviceHours: read('service_hours', SETTINGS_DEFAULTS.serviceHours),
+        timezone: read('timezone', SETTINGS_DEFAULTS.timezone),
+        durationDiscounts: read('duration_discounts', SETTINGS_DEFAULTS.durationDiscounts),
+        refundTiers: read('refund_tiers', SETTINGS_DEFAULTS.refundTiers),
+        termsVersion: read('terms_version', SETTINGS_DEFAULTS.termsVersion),
+        confirmationSlaMinutes: read(
+          'confirmation_sla_minutes',
+          SETTINGS_DEFAULTS.confirmationSlaMinutes,
+        ),
+        grievanceContact: read('grievance_contact', SETTINGS_DEFAULTS.grievanceContact),
+      }
+    } catch {
+      return SETTINGS_DEFAULTS
+    }
+  },
+  ['settings'],
+  { revalidate: 60, tags: ['settings'] },
+)
 
 /** Durations the picker offers, derived from the discount tiers. */
 export function offeredDurations(settings: Settings): number[] {

@@ -1,7 +1,7 @@
 import 'server-only'
 import { createHash } from 'node:crypto'
 import { headers } from 'next/headers'
-import { createCustomerClient } from '@/lib/supabase/customer'
+import { createServiceClient } from '@/lib/supabase/service'
 
 /**
  * Salted hashing and client IP, still used by the ADMIN login throttle
@@ -26,37 +26,25 @@ export async function clientIp(): Promise<string> {
   return h.get('x-real-ip') ?? 'unknown'
 }
 
-/**
- * Post-authentication throttling for booking holds and reviews. TASKS T21.
- *
- * Keyed on the customer rather than on an IP: both actions require a session,
- * and a per-customer limit is both simpler and harder to evade than one keyed on
- * a shared mobile network address.
- *
- * A failure here is deliberately *not* fatal. If the limiter itself is broken,
- * refusing every booking would turn a monitoring problem into an outage; the
- * database constraints still hold, so the request is allowed through.
- */
-export type ActionLimit = { ok: true } | { ok: false; reason: string }
-
-export async function checkActionRateLimit(
-  action: 'booking_hold' | 'review',
-  customerId: string,
-): Promise<ActionLimit> {
-  try {
-    const supabase = createCustomerClient()
-    const { data, error } = await supabase.rpc('ac_check_action_rate_limit', {
-      p_action: action,
-      p_customer_id: customerId,
-    })
-    const row = data?.[0]
-    if (error || !row) return { ok: true }
-    if (row.allowed) return { ok: true }
-    return {
-      ok: false,
-      reason: row.reason ?? 'Too many attempts just now. Try again shortly.',
-    }
-  } catch {
-    return { ok: true }
-  }
+/** Database-backed limits survive serverless instances and deployment restarts. */
+export async function allowPublicBookingAttempt(email: string): Promise<boolean> {
+  const service = createServiceClient()
+  const [ipAllowed, emailAllowed] = await Promise.all([
+    (service.rpc as any)('ac_consume_public_action_limit', {
+      p_scope: 'booking_ip',
+      p_subject_hash: hashIdentifier(await clientIp()),
+      p_max_attempts: 20,          // raised: 20 attempts per IP per window
+      p_window_seconds: 15 * 60,
+    }),
+    (service.rpc as any)('ac_consume_public_action_limit', {
+      p_scope: 'booking_email',
+      p_subject_hash: hashIdentifier(email.trim().toLowerCase()),
+      p_max_attempts: 10,          // raised: 10 attempts per email per window
+      p_window_seconds: 15 * 60,
+    }),
+  ])
+  // If the RPC itself errors (e.g. function not yet deployed), fail open so
+  // legitimate customers are never silently blocked by an infrastructure gap.
+  if (ipAllowed.error || emailAllowed.error) return true
+  return Boolean(ipAllowed.data) && Boolean(emailAllowed.data)
 }

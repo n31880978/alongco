@@ -154,7 +154,7 @@ async function handlePaymentCaptured(
     throw new Error('payment amount does not match the booking')
   }
 
-  await supabase
+  const { error: paymentUpdateError } = await supabase
     .from('payments')
     .update({
       status: 'captured',
@@ -163,6 +163,7 @@ async function handlePaymentCaptured(
       captured_at: new Date().toISOString(),
     })
     .eq('id', paymentRow.id)
+  if (paymentUpdateError) throw new Error('could not record captured payment')
 
   // ac_set_booking_status is itself idempotent — a repeat is a no-op and writes
   // no second booking_events row.
@@ -211,7 +212,7 @@ async function handlePaymentFailed(supabase: Service, payload: RazorpayWebhookPa
 
   // The booking stays `pending_payment` so she can retry inside the hold window
   // and resume the same booking (PRD §6.6).
-  await supabase
+  const { error: paymentUpdateError } = await supabase
     .from('payments')
     .update({
       status: 'failed',
@@ -222,6 +223,7 @@ async function handlePaymentFailed(supabase: Service, payload: RazorpayWebhookPa
     })
     .eq('payment_provider', PROVIDER)
     .eq('provider_order_id', orderId)
+  if (paymentUpdateError) throw new Error('could not record failed payment')
 }
 
 async function handleRefundStatus(supabase: Service, payload: RazorpayWebhookPayload) {
@@ -233,7 +235,7 @@ async function handleRefundStatus(supabase: Service, payload: RazorpayWebhookPay
 
   const status = mapRefundStatus(String(refund?.status ?? ''))
 
-  await supabase
+  const { error } = await supabase
     .from('refunds')
     .update({
       status,
@@ -241,6 +243,7 @@ async function handleRefundStatus(supabase: Service, payload: RazorpayWebhookPay
       settled_at: status === 'success' ? new Date().toISOString() : null,
     })
     .eq('refund_reference', reference)
+  if (error) throw new Error('could not record refund status')
 }
 
 /** Razorpay probes the endpoint when the webhook is configured. */

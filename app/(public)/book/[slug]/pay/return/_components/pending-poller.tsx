@@ -8,9 +8,9 @@ import { SUPPORT_PHONE, SUPPORT_PHONE_HREF } from '@/lib/contact'
 /**
  * Waits for the webhook.
  *
- * It refreshes the server component rather than deciding anything: the page
- * re-reads the booking, and redirects to the ticket only once the database says
- * `confirmed`. Nothing here can confirm a booking (CLAUDE.md §3.3).
+ * Refreshes the server component rather than deciding anything — the page
+ * re-reads the booking, and redirects to the ticket only once the database
+ * says `confirmed`. Nothing here can confirm a booking (CLAUDE.md §3.3).
  */
 export function PendingPoller({
   reference,
@@ -20,10 +20,6 @@ export function PendingPoller({
 }: {
   reference: string
   stillHeld: boolean
-  /**
-   * The Razorpay checkout handshake verified server-side. Changes the wording
-   * only — this component still cannot confirm anything.
-   */
   checkoutCompleted: boolean
   retryHref: string
 }) {
@@ -31,80 +27,112 @@ export function PendingPoller({
   const [waitedSeconds, setWaited] = useState(0)
 
   useEffect(() => {
+    if (!checkoutCompleted) return
     const tick = setInterval(() => setWaited((s) => s + 2), 2000)
-    // Back off after the first half-minute; a webhook this late is unusual and
-    // hammering the database will not make it arrive sooner.
     const poll = setInterval(() => router.refresh(), waitedSeconds < 30 ? 2000 : 6000)
     return () => {
       clearInterval(tick)
       clearInterval(poll)
     }
-  }, [router, waitedSeconds])
+  }, [router, waitedSeconds, checkoutCompleted])
 
   const slow = waitedSeconds >= 20
 
   return (
-    <section className="bg-white px-[18px] py-6">
-      <div className="mb-4 flex items-center gap-2.5">
-        <span className="relative flex h-2.5 w-2.5" aria-hidden>
-          <span className="absolute inset-0 rounded-full bg-blue" />
-          <span className="absolute inset-0 animate-pulse2 rounded-full bg-blue" />
-        </span>
-        <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-blue-dark">
-          {checkoutCompleted ? 'PAYMENT RECEIVED · CONFIRMING' : 'CHECKING WITH THE PAYMENT PROVIDER'}
-        </span>
+    <div className="bg-white">
+      {/* Status indicator */}
+      <div className={`px-[18px] py-3.5 border-b ${checkoutCompleted ? 'bg-blue-tint border-blue/15' : 'bg-amber-tint border-amber/20'}`}>
+        <div className="flex items-center gap-2.5">
+          <span className="relative flex h-2.5 w-2.5" aria-hidden>
+            <span className={`absolute inset-0 rounded-full ${checkoutCompleted ? 'bg-blue' : 'bg-amber'}`} />
+            {checkoutCompleted && (
+              <span className="absolute inset-0 animate-pulse2 rounded-full bg-blue" />
+            )}
+          </span>
+          <span className={`font-mono text-[10px] font-semibold tracking-[0.1em] ${checkoutCompleted ? 'text-blue-dark' : 'text-amber'}`}>
+            {checkoutCompleted ? 'PAYMENT VERIFIED · CONFIRMING BOOKING' : 'PAYMENT NOT COMPLETED'}
+          </span>
+        </div>
       </div>
 
-      <h1 className="mb-2 font-serif text-[22px] font-light leading-[1.22] text-ink">
-        {checkoutCompleted
-          ? 'Your payment went through — we are confirming it'
-          : 'Hold on — we are confirming your payment'}
-      </h1>
-      <p className="mb-4 font-sans text-[13px] leading-[1.5] text-ink/65">
-        Your bank tells us directly, which is more reliable than this page. It usually
-        takes a few seconds. You do not need to pay again, and you can close this page —
-        the ticket will be in your bookings either way.
-      </p>
+      {/* Main content */}
+      <section className="px-[18px] py-6">
+        <h1 className="mb-2 font-serif text-[24px] font-light leading-[1.2] text-ink">
+          {checkoutCompleted
+            ? 'Your payment is verified'
+            : 'Nothing was charged'}
+        </h1>
+        <p className="mb-5 font-sans text-[13px] leading-[1.6] text-ink/65">
+          {checkoutCompleted
+            ? 'We received Razorpay\'s signed confirmation and are waiting for the final server-to-server acknowledgement. This usually takes a few seconds. Do not pay again.'
+            : 'We did not receive a verified payment for this booking. Nothing has been charged. You can safely try again while your slot is held.'}
+        </p>
 
-      <dl className="mb-4 rounded-lg border border-ink/10 bg-paper px-3.5 py-3">
-        <div className="flex justify-between">
-          <dt className="font-sans text-[12.5px] text-ink/60">Reference</dt>
-          <dd className="font-mono text-[12.5px] font-semibold text-ink">{reference}</dd>
+        {/* Reference */}
+        <div className="mb-5 rounded-xl border border-ink/10 bg-paper px-4 py-3.5">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-ink/45">
+              Booking reference
+            </span>
+            <span className="font-mono text-[14px] font-bold text-ink">{reference}</span>
+          </div>
         </div>
-      </dl>
 
-      {slow && (
-        <div className="mb-4 rounded-lg border border-amber/25 bg-amber-tint px-3.5 py-3">
-          <p className="font-sans text-[12.5px] leading-[1.5] text-ink/75">
-            This is taking longer than usual.{' '}
-            {stillHeld
-              ? 'Your slot is still held. If the money left your account it will show here shortly — do not pay a second time.'
-              : 'If money left your account it will be returned automatically. Do not pay a second time.'}{' '}
-            Call us on{' '}
-            <a href={SUPPORT_PHONE_HREF} className="font-mono font-medium text-ink">
-              {SUPPORT_PHONE}
-            </a>{' '}
-            with the reference above and we will check it while you wait.
-          </p>
-        </div>
-      )}
-
-      <div className="flex gap-2">
-        <Link
-          href="/bookings"
-          className="flex h-[46px] flex-1 items-center justify-center rounded-lg border border-ink/15 font-sans text-[13.5px] font-semibold text-ink"
-        >
-          Your bookings
-        </Link>
-        {stillHeld && (
-          <Link
-            href={retryHref}
-            className="flex h-[46px] flex-1 items-center justify-center rounded-lg border border-blue/30 font-sans text-[13.5px] font-semibold text-blue-dark"
-          >
-            Try paying again
-          </Link>
+        {/* Slow warning */}
+        {checkoutCompleted && slow && (
+          <div className="mb-5 rounded-xl border border-amber/25 bg-amber-tint px-4 py-3.5">
+            <p className="mb-1 font-mono text-[9.5px] font-semibold uppercase tracking-[.08em] text-amber">
+              Taking longer than usual
+            </p>
+            <p className="font-sans text-[12.5px] leading-[1.55] text-ink/75">
+              {stillHeld
+                ? 'Your slot is still held. If money left your account, it will appear here shortly — do not pay a second time.'
+                : 'If money left your account it will be returned automatically. Do not pay a second time.'}{' '}
+              Call us on{' '}
+              <a href={SUPPORT_PHONE_HREF} className="font-mono font-semibold text-ink underline-offset-2 underline">
+                {SUPPORT_PHONE}
+              </a>{' '}
+              with the reference above.
+            </p>
+          </div>
         )}
-      </div>
-    </section>
+
+        {/* Action buttons */}
+        <div className="flex flex-col gap-2.5">
+          {checkoutCompleted && (
+            <Link
+              href={`/ticket/${reference}`}
+              className="flex h-[50px] items-center justify-center rounded-xl border border-ink/15 font-sans text-[13.5px] font-semibold text-ink hover:bg-paper-warm transition-colors"
+            >
+              Check my ticket
+            </Link>
+          )}
+          {stillHeld && !checkoutCompleted && (
+            <Link
+              href={retryHref}
+              className="flex h-[50px] items-center justify-center rounded-xl bg-ink font-sans text-[13.5px] font-semibold text-white transition-colors"
+            >
+              Try paying again
+            </Link>
+          )}
+          {stillHeld && checkoutCompleted && (
+            <Link
+              href={retryHref}
+              className="flex h-[50px] items-center justify-center rounded-xl border border-blue/25 bg-blue-tint font-sans text-[13.5px] font-semibold text-blue-dark transition-colors"
+            >
+              Retry payment
+            </Link>
+          )}
+        </div>
+
+        {/* Support footer */}
+        <p className="mt-5 text-center font-sans text-[12px] text-ink/45">
+          Need help?{' '}
+          <a href={SUPPORT_PHONE_HREF} className="font-mono font-semibold text-ink">
+            {SUPPORT_PHONE}
+          </a>
+        </p>
+      </section>
+    </div>
   )
 }

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PublicHeader } from '@/components/site/header'
 import { CompanionCard } from '@/components/site/companion-card'
-import { getAvailabilityDigest, listAreas, listCompanions } from '@/lib/companions'
+import { getAvailability, listAreas, listCompanions } from '@/lib/companions'
 import { getSettings } from '@/lib/settings'
 import { formatPaise } from '@/lib/booking/pricing'
 import { formatSlotLabel, zonedDateKey } from '@/lib/time/zone'
@@ -42,32 +42,41 @@ export default async function BrowsePage({
   ])
 
   const accepting = companions.filter((c) => c.isAccepting)
-  const digestByCompanion = await Promise.all(
-    accepting.map(async (c) => ({
-      id: c.id,
-      digest: await getAvailabilityDigest([c], {
-        durationMinutes: settings.minDurationMinutes,
-      }),
-    })),
+
+  // Per-companion availability: one RPC each, all in parallel.
+  // getAvailabilityDigest merges all companions into a shared time-slot map,
+  // which loses per-companion "first free" data. We use getAvailability
+  // directly here so each card can show its own next free slot.
+  // unstable_cache on settings + ISR (revalidate=300) means this block runs
+  // at most every 5 minutes regardless of concurrency.
+  const perCompanionDays = await Promise.all(
+    accepting.map((c) =>
+      getAvailability(c.id, { durationMinutes: settings.minDurationMinutes }),
+    ),
   )
 
-  const statusFor = (companionId: string) => {
-    const entry = digestByCompanion.find((d) => d.id === companionId)
-    if (!entry) return undefined
-    const today = zonedDateKey(new Date(), settings.timezone)
+  const today = zonedDateKey(new Date(), settings.timezone)
+  const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-    for (const day of entry.digest) {
-      const firstFree = day.times.find((t) => t.free)
+  const statusFor = (companionId: string) => {
+    const idx = accepting.findIndex((c) => c.id === companionId)
+    const days = idx >= 0 ? perCompanionDays[idx] : undefined
+    if (!days) return undefined
+
+    for (const day of days) {
+      const firstFree = day.slots.find((s) => s.available)
       if (!firstFree) continue
       if (day.date === today) {
         return {
-          label: `FREE ${formatSlotLabel(new Date(firstFree.value), settings.timezone)
+          label: `FREE ${formatSlotLabel(firstFree.startsAt, settings.timezone)
             .replace(':00', '')
             .replace(' ', '')}`,
           tone: 'free' as const,
         }
       }
-      return { label: `NEXT: ${day.weekday}`, tone: 'later' as const }
+      // Derive weekday label from the date string (YYYY-MM-DD in IST)
+      const weekdayIdx = new Date(`${day.date}T12:00:00+05:30`).getDay()
+      return { label: `NEXT: ${DAY_NAMES[weekdayIdx]}`, tone: 'later' as const }
     }
     return { label: 'FULL THIS WEEK', tone: 'later' as const }
   }

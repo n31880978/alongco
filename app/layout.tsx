@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { ClerkProvider } from '@clerk/nextjs'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { SITE_NAME, siteUrl } from '@/lib/seo'
@@ -61,27 +60,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  /*
-   * ClerkProvider wraps the whole tree, including the admin group. That is
-   * harmless: admin pages never render a Clerk component and never read a Clerk
-   * session — the admin surface authenticates through Supabase email +
-   * password and gates on the admin_users row. Wrapping here rather than only
-   * in the public layout keeps a single provider, which is what Clerk's
-   * client-side session hooks expect.
-   *
-   * OAuth redirect URLs are configured via environment variables
-   * NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL and NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL.
-   * The forceRedirectUrl on the <SignIn> component handles the ?next= case;
-   * the env vars are the fallback for OAuth redirects which bypass the component.
-   */
   return (
-    <ClerkProvider>
-      <html lang="en-IN" className="bg-paper">
-        <body className="min-h-screen bg-paper font-sans text-ink antialiased">
-          {children}
-          <Analytics />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en-IN" className="bg-paper">
+      <body className="min-h-screen bg-paper font-sans text-ink antialiased">
+        {children}
+        <Analytics />
+      </body>
+    </html>
   )
 }

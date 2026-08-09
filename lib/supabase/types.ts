@@ -316,6 +316,10 @@ export type Database = {
           p_duration_minutes: number
           p_area_id: string
           p_terms_version: string
+          p_full_name: string
+          p_email: string
+          p_phone: string
+          p_preferences?: string | null
           p_customer_notes?: string | null
         }
         Returns: {
@@ -324,6 +328,7 @@ export type Database = {
           amount_paise: number
           hold_expires_at: string
           resumed: boolean
+          customer_id?: string
         }
       }
       get_availability_inputs: {
@@ -444,6 +449,49 @@ export type Database = {
       }
       ac_expire_holds: { Args: Record<string, never>; Returns: number }
       ac_complete_bookings: { Args: Record<string, never>; Returns: number }
+      get_booking_by_reference: {
+        Args: { p_reference: string }
+        Returns: {
+          id: string
+          reference: string
+          status: string
+          starts_at: string
+          ends_at: string
+          amount_paise: number
+          rate_snapshot_paise: number
+          discount_percent: number
+          hold_expires_at: string | null
+          terms_version: string
+          terms_accepted_at: string
+          customer_notes: string | null
+          area_id: string
+          area_name: string
+          companion_slug: string
+          companion_name: string
+          companion_photo_path: string | null
+          confirmed_at: string | null
+          cancelled_at: string | null
+          refund_tier_applied: string | null
+          payment_method: string | null
+          customer_full_name: string | null
+          customer_email: string | null
+          customer_phone: string | null
+        } | null
+      }
+      list_bookings_by_email: {
+        Args: { p_email: string }
+        Returns: {
+          id: string
+          reference: string
+          status: string
+          starts_at: string
+          ends_at: string
+          amount_paise: number
+          area_name: string
+          companion_name: string
+          companion_slug: string
+        }[]
+      }
     }
     Enums: {
       booking_status: BookingStatus

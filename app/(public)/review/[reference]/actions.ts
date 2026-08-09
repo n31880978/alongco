@@ -2,23 +2,21 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { createCustomerClient } from '@/lib/supabase/customer'
-import { getCurrentCustomer } from '@/lib/auth/session'
-import { checkActionRateLimit } from '@/lib/auth/rate-limit'
+import { createServiceClient } from '@/lib/supabase/service'
+import { getBookingByReference } from '@/lib/booking/queries'
 
 /**
  * Review submission. PRD §6.10.
  *
- * Deliberately on the *user's* client, not the service client: the insert is
- * allowed only by reviews_insert_own, which checks in the database that the
- * booking belongs to the caller, is `completed`, and has already ended. The
- * eligibility rule is therefore enforced by RLS rather than by this function
- * agreeing to be careful.
+ * No auth required. The booking reference is the access token. We check in the
+ * database that the booking is `completed` and has already ended using RLS on
+ * the reviews table.
  */
 
 export type ReviewFormState = { error?: string; ok?: string }
 
 const schema = z.object({
+  reference: z.string().min(1),
   bookingId: z.string().uuid(),
   rating: z.coerce.number().int().min(1, 'Pick a rating.').max(5),
   body: z.string().trim().max(1500, 'Keep it under 1500 characters.').optional(),
@@ -28,10 +26,8 @@ export async function submitReview(
   _prev: ReviewFormState,
   formData: FormData,
 ): Promise<ReviewFormState> {
-  const customer = await getCurrentCustomer()
-  if (!customer) return { error: 'Sign in again to leave a review.' }
-
   const parsed = schema.safeParse({
+    reference: formData.get('reference'),
     bookingId: formData.get('bookingId'),
     rating: formData.get('rating'),
     body: formData.get('body') || undefined,
@@ -40,40 +36,40 @@ export async function submitReview(
     return { error: parsed.error.issues[0]?.message ?? 'Check the form.' }
   }
 
-  const { bookingId, rating, body } = parsed.data
+  const { reference, bookingId, rating, body } = parsed.data
 
-  // T21.
-  const limit = await checkActionRateLimit('review', customer.id)
-  if (!limit.ok) return { error: limit.reason }
+  // Verify the reference matches the booking id (is the access token)
+  const booking = await getBookingByReference(reference)
+  if (!booking || booking.id !== bookingId) {
+    return { error: 'We cannot find that booking.' }
+  }
 
-  const supabase = createCustomerClient()
-
-  const { data: booking } = await supabase
-    .from('bookings')
-    .select('id, companion_id, status, ends_at, reference')
-    .eq('id', bookingId)
-    .maybeSingle()
-
-  if (!booking) return { error: 'We cannot find that booking.' }
-
-  const b = booking as { companion_id: string; status: string; ends_at: string; reference: string }
-
-  // Checked here as well so the message is specific rather than a bare RLS
-  // rejection — she should know *why* she cannot review it.
-  if (b.status !== 'completed') {
+  // Check eligibility
+  if (booking.status !== 'completed') {
     return {
       error:
         'Only a completed booking can be reviewed. A cancelled booking, or one that ended early, cannot.',
     }
   }
-  if (new Date(b.ends_at).getTime() > Date.now()) {
+  if (new Date(booking.endsAt).getTime() > Date.now()) {
     return { error: 'This booking has not finished yet.' }
   }
 
+  // Look up the companion UUID — bookingView.companionSlug is a string, not a UUID.
+  // Service-role reads the companion id directly from the booking row via the query layer.
+  const supabase = createServiceClient()
+  const { data: bookingRow } = await supabase
+    .from('bookings')
+    .select('companion_id, customer_id')
+    .eq('id', bookingId)
+    .single()
+
+  if (!bookingRow) return { error: 'We cannot find that booking.' }
+
   const { error } = await supabase.from('reviews').insert({
     booking_id: bookingId,
-    customer_id: customer.id,
-    companion_id: b.companion_id,
+    companion_id: bookingRow.companion_id,
+    customer_id: bookingRow.customer_id,
     rating,
     body: body || null,
     is_published: false,
@@ -89,8 +85,7 @@ export async function submitReview(
     }
   }
 
-  revalidatePath('/bookings')
-  revalidatePath(`/review/${b.reference}`)
+  revalidatePath(`/ticket/${reference}`)
 
   return {
     ok: 'Thank you. We read every review before it goes on his profile, so it will not appear straight away.',

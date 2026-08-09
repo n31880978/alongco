@@ -1,89 +1,100 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import { PublicHeader } from '@/components/site/header'
-import { HoldTimer } from '@/components/site/hold-timer'
-import { getOwnBooking, isHoldLive } from '@/lib/booking/queries'
-import { getCurrentCustomer } from '@/lib/auth/session'
-import { getCompanion } from '@/lib/companions'
-import { formatPaise } from '@/lib/booking/pricing'
-import { maskEmail } from '@/lib/utils'
-import { HoldExpired } from '../_components/hold-expired'
-import { DetailsForm } from './_components/details-form'
+import { getAvailability, getCompanion } from '@/lib/companions'
+import { getSettings, offeredDurations } from '@/lib/settings'
+import { formatPaise, quote } from '@/lib/booking/pricing'
+import { formatSlotLabel } from '@/lib/time/zone'
+import { StepBar } from '../_components/step-bar'
+import { ContactForm } from './_components/contact-form'
 
 export const dynamic = 'force-dynamic'
+export const metadata: Metadata = { title: 'Contact details', robots: { index: false } }
 
-export const metadata: Metadata = {
-  title: 'Your details',
-  robots: { index: false },
-}
-
-export default async function DetailsPage({
+export default async function ContactDetailsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ b?: string }>
+  searchParams: Promise<{ m?: string; t?: string }>
 }) {
   const { slug } = await params
-  const { b } = await searchParams
-  if (!b) notFound()
+  const { m, t } = await searchParams
 
-  const customer = await getCurrentCustomer()
-  if (!customer) {
-    redirect(`/sign-in?next=${encodeURIComponent(`/book/${slug}/details?b=${b}`)}`)
-  }
-
-  // RLS scopes this to her own bookings, so another customer's id is a 404.
-  const booking = await getOwnBooking(b)
-  if (!booking) notFound()
-
-  if (booking.status !== 'pending_payment') {
-    // Already paid, or cancelled while she was away — send her to the record.
-    redirect(`/ticket/${booking.reference}`)
-  }
-
-  const companion = await getCompanion(slug)
+  const [companion, settings] = await Promise.all([getCompanion(slug), getSettings()])
   if (!companion) notFound()
 
-  if (!isHoldLive(booking)) {
-    return (
-      <>
-        <PublicHeader back={{ href: `/book/${slug}`, label: companion.displayName }} />
-        <HoldExpired slug={slug} />
-      </>
-    )
-  }
+  const minutes = offeredDurations(settings).includes(Number(m))
+    ? Number(m)
+    : settings.minDurationMinutes
+  if (!t) redirect(`/book/${slug}?m=${minutes}`)
 
-  const areas = companion.areaIds.map((id, i) => ({ id, name: companion.areas[i] }))
+  const days = await getAvailability(companion.id, { durationMinutes: minutes })
+  const slot = days
+    .flatMap((d) => d.slots)
+    .find((s) => s.startsAt.toISOString() === t && s.available)
+  if (!slot) redirect(`/book/${slug}?m=${minutes}`)
+
+  const price = quote(companion.hourlyRatePaise, minutes, settings.durationDiscounts)
+
+  const dateLabel = new Intl.DateTimeFormat('en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: settings.timezone,
+  }).format(slot.startsAt)
+
+  const timeLabel = `${formatSlotLabel(slot.startsAt, settings.timezone)}–${formatSlotLabel(slot.endsAt, settings.timezone)}`
+  const durationLabel = `${minutes / 60} hour${minutes === 60 ? '' : 's'}`
+
+  // Where the preferences page will live
+  const preferencesBase = `/book/${slug}/preferences?m=${minutes}&t=${encodeURIComponent(t)}`
 
   return (
     <>
       <PublicHeader
-        back={{ href: `/book/${slug}`, label: companion.displayName }}
+        back={{ href: `/book/${slug}?m=${minutes}&t=${encodeURIComponent(t)}`, label: 'Change time' }}
       />
-      <HoldTimer expiresAt={booking.holdExpiresAt!} />
 
-      <section className="border-b border-ink/10 bg-white px-[18px] pb-3.5 pt-[18px]">
-        <h1 className="mb-[5px] font-serif text-[24px] font-light leading-[1.2] text-ink">
-          Three things, and nothing else
+      <div className="border-b border-ink/10 bg-white px-[18px] pb-5 pt-5">
+        <StepBar current={2} />
+
+        <h1 className="mb-1.5 mt-5 font-serif text-[28px] font-light leading-[1.15] text-ink">
+          Your contact details
         </h1>
-        <p className="font-sans text-[12.5px] leading-[1.5] text-ink/60">
-          We ask for the minimum the booking needs. No address, no photo.
+        <p className="font-sans text-[13px] leading-[1.55] text-ink/55">
+          We use these only to arrange your booking and send your ticket.
         </p>
-      </section>
 
-      <DetailsForm
-        slug={slug}
-        bookingId={booking.id}
-        maskedEmail={maskEmail(customer.email ?? '')}
-        defaultName={customer.full_name ?? ''}
-        defaultPhone={customer.phone ?? ''}
-        defaultAreaId={booking.areaId}
-        defaultNotes={booking.customerNotes ?? ''}
-        areas={areas}
-        companionName={companion.displayName}
-        amountLabel={formatPaise(booking.amountPaise)}
-        alreadyConsented={Boolean(customer.consent_at)}
+        {/* Booking summary pill */}
+        <div className="mt-4 overflow-hidden rounded-xl border border-blue/20 bg-blue-tint">
+          <div className="flex items-stretch">
+            <div className="flex flex-1 flex-col justify-center px-4 py-3.5">
+              <p className="font-sans text-[14px] font-semibold text-ink">
+                {companion.displayName}
+              </p>
+              <p className="mt-0.5 font-mono text-[9.5px] font-medium uppercase tracking-[0.06em] text-ink/50">
+                {dateLabel}
+              </p>
+              <p className="font-mono text-[9.5px] font-medium uppercase tracking-[0.06em] text-ink/50">
+                {timeLabel} · {durationLabel}
+              </p>
+            </div>
+            <div className="flex items-center justify-center border-l border-blue/15 bg-white/60 px-4">
+              <span className="font-mono text-[18px] font-bold text-ink">
+                {formatPaise(price.amountPaise)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ContactForm
+        preferencesBase={preferencesBase}
+        areas={companion.areaIds.map((id, i) => ({
+          id,
+          name: companion.areas[i] ?? 'Meeting area',
+        }))}
       />
     </>
   )

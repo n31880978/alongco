@@ -1,0 +1,41 @@
+name: Cron — Expiry & Completion
+
+# Free-tier GitHub Actions replaces pg_cron and Vercel cron (not available on free).
+# Runs every minute to expire holds, and hourly to complete bookings.
+on:
+  schedule:
+    # Every minute (subject to GitHub's 5-minute resolution on runners)
+    - cron: '* * * * *'
+
+jobs:
+  expire_holds:
+    name: Expire holds
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Expire pending_payment holds older than hold_minutes
+        run: |
+          curl -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/cron-expire-holds" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+        continue-on-error: true
+
+  complete_bookings:
+    name: Complete bookings (hourly)
+    runs-on: ubuntu-latest
+    environment: production
+    # Only run on the hour to avoid noise
+    if: github.event.schedule == '0 * * * *'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mark completed bookings
+        run: |
+          curl -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/cron-complete-bookings" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+        continue-on-error: true

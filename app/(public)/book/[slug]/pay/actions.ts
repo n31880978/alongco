@@ -2,12 +2,11 @@
 
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
-import { requireCustomer } from '@/lib/auth/session'
 import { getSettings } from '@/lib/settings'
 import { createOrder } from '@/lib/payments/razorpay/orders'
 import { ACTIVE_PROVIDER } from '@/lib/payments/provider'
 import { bookingErrorMessage } from '@/lib/booking/errors'
-import { getOwnBooking, isHoldLive } from '@/lib/booking/queries'
+import { getBookingById, isHoldLive } from '@/lib/booking/queries'
 
 export type PayState = {
   error?: string
@@ -35,11 +34,11 @@ const schema = z.object({
 /**
  * Creates the Razorpay order and hands back what Checkout.js needs to open.
  *
+ * No auth required. The booking is looked up by id (which comes from the slot
+ * picker), and the customer details were already submitted with the hold.
+ *
  * This does NOT confirm anything. CLAUDE.md §3.3 — a booking becomes confirmed
  * on a verified webhook and nowhere else. All this does is open a checkout.
- *
- * The key id returned here is Razorpay's publishable key, which is designed to
- * be in the browser. The key secret never leaves the server.
  */
 export async function startPayment(
   _prev: PayState,
@@ -57,10 +56,7 @@ export async function startPayment(
 
   const { bookingId, termsVersion } = parsed.data
 
-  const customer = await requireCustomer()
-  if (!customer) return { error: bookingErrorMessage('AC_NOT_AUTHENTICATED') }
-
-  const booking = await getOwnBooking(bookingId)
+  const booking = await getBookingById(bookingId)
   if (!booking) return { error: bookingErrorMessage('AC_BOOKING_NOT_FOUND') }
 
   if (booking.status !== 'pending_payment') {
@@ -87,23 +83,18 @@ export async function startPayment(
 
   // A fresh receipt per attempt, so a retry after a decline is a new Razorpay
   // order against the same booking (PRD §6.6) rather than a reused one.
-  // Razorpay caps receipt at 40 characters.
   const attempt = Date.now().toString(36).toUpperCase()
   const receipt = `${booking.reference}-${attempt}`.slice(0, 40)
 
   try {
     const order = await createOrder({
       receipt,
-      // Straight off the booking row the RPC snapshotted. The browser never
-      // supplied it and cannot influence it (§3.1).
       amountPaise: booking.amountPaise,
       bookingReference: booking.reference,
     })
 
-    // Service role: payments is service_role-only by policy (§3.9). Written
-    // AFTER the order exists, because Razorpay assigns the order id — there is
-    // nothing to key the row on until it answers. If this insert fails, the
-    // orphaned Razorpay order is simply never paid: it opens no checkout.
+    // Service role: payments is service_role-only by policy. Write the row
+    // AFTER the order exists so Razorpay can assign the order id.
     const service = createServiceClient()
     const { error: insertError } = await service.from('payments').insert({
       booking_id: booking.id,
@@ -126,14 +117,12 @@ export async function startPayment(
         amountPaise: booking.amountPaise,
         keyId,
         reference: booking.reference,
-        prefillName: customer.full_name,
-        prefillEmail: customer.email,
-        prefillContact: customer.phone,
+        prefillName: booking.customerFullName,
+        prefillEmail: booking.customerEmail,
+        prefillContact: booking.customerPhone,
       },
     }
   } catch {
-    // Never "something went wrong" here — she needs to know her money did not
-    // move (CLAUDE.md §6).
     return {
       error:
         'We could not reach the payment provider, so nothing was charged. Your slot is still held — try again, or call us.',

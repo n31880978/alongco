@@ -15,9 +15,11 @@ import { submitReview, type ReviewFormState } from '../actions'
  */
 export function ReviewForm({
   bookingId,
+  reference,
   companionName,
 }: {
   bookingId: string
+  reference: string
   companionName: string
 }) {
   const [state, action] = useActionState<ReviewFormState, FormData>(submitReview, {})
@@ -34,6 +36,7 @@ export function ReviewForm({
 
   return (
     <form action={action} className="flex flex-col gap-4">
+      <input type="hidden" name="reference" value={reference} />
       <input type="hidden" name="bookingId" value={bookingId} />
       <input type="hidden" name="rating" value={rating} />
 

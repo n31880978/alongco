@@ -1,4 +1,10 @@
 import type { NextConfig } from 'next'
+import { fileURLToPath } from 'node:url'
+
+// Keep Turbopack and output tracing scoped to this repository. There is an
+// unrelated pnpm lockfile higher in the home directory; allowing Next to infer
+// that as the root produces misleading workspace warnings and broad tracing.
+const projectRoot = fileURLToPath(new URL('.', import.meta.url))
 
 const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
@@ -7,6 +13,36 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  turbopack: {
+    root: projectRoot,
+  },
+  outputFileTracingRoot: projectRoot,
+
+  // Allow up to 5 MB in Server Action request bodies (photo uploads).
+  // Default is 1 MB; companion photos can easily exceed that.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb',
+    },
+  },
+
+  cacheLife: {
+    short: {
+      stale: 60,
+      revalidate: 30,
+      expire: 300,
+    },
+    medium: {
+      stale: 300,
+      revalidate: 60,
+      expire: 3600,
+    },
+    long: {
+      stale: 3600,
+      revalidate: 300,
+      expire: 86400,
+    },
+  },
 
   images: {
     // Companion photos live in the public companion-photos bucket. Nothing else

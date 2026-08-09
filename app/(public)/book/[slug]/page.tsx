@@ -6,8 +6,9 @@ import { getAvailability, getCompanion } from '@/lib/companions'
 import { getSettings, offeredDurations } from '@/lib/settings'
 import { formatPaise, quote } from '@/lib/booking/pricing'
 import { nextAvailableDate } from '@/lib/booking/availability'
-import { formatSlotLabel, zonedDateKey, zonedParts } from '@/lib/time/zone'
+import { formatSlotLabel, zonedParts } from '@/lib/time/zone'
 import { SlotPicker } from './_components/slot-picker'
+import { StepBar } from './_components/step-bar'
 import { cn } from '@/lib/utils'
 import { TrackView } from '@/components/analytics/ga'
 
@@ -78,6 +79,8 @@ export default async function SlotPickerPage({
         .toUpperCase()
     : ''
 
+  const areas = companion.areaIds.map((id, i) => ({ id, name: companion.areas[i] ?? '' }))
+
   return (
     <>
       <TrackView event="select_slot" companionSlug={slug} />
@@ -89,15 +92,14 @@ export default async function SlotPickerPage({
         }}
       />
 
-      <section className="border-b border-ink/10 bg-white px-[18px] pb-3.5 pt-[18px]">
-        <h1 className="mb-[5px] font-serif text-[24px] font-light leading-[1.2] text-ink">
-          Pick a day and a time
+      <section className="border-b border-ink/10 bg-white px-[18px] pb-5 pt-5">
+        <StepBar current={1} />
+        <h1 className="mb-1.5 mt-5 font-serif text-[28px] font-light leading-[1.15] text-ink">
+          Pick your time
         </h1>
-        <p className="font-sans text-[12.5px] leading-[1.5] text-ink/60">
-          Times already taken stay on screen, greyed out. Service hours{' '}
-          {friendlyHour(settings.serviceHours.start)} to{' '}
-          {friendlyHour(settings.serviceHours.end)}, {settings.bookingWindowDays} days
-          ahead.
+        <p className="font-sans text-[13px] leading-[1.55] text-ink/55">
+          Service hours{' '}
+          {friendlyHour(settings.serviceHours.start)}–{friendlyHour(settings.serviceHours.end)}, {settings.bookingWindowDays} days out. Greyed slots are taken.
         </p>
       </section>
 
@@ -231,6 +233,7 @@ export default async function SlotPickerPage({
               }
             })}
             bufferMinutes={settings.bufferMinutes}
+            areas={areas}
           />
         </>
       )}

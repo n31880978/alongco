@@ -18,7 +18,7 @@ import { CompanionForm } from '../_components/companion-form'
 import { AvailabilityEditor, BlackoutEditor } from '../_components/schedule-editor'
 import { IdentityPanel } from '../_components/identity-panel'
 import { PhotoUpload } from '../_components/photo-upload'
-import { toggleCompanion } from '../actions'
+import { toggleCompanion, deleteCompanion } from '../actions'
 
 export const metadata = {
   title: 'Companion · AlongCo Admin',
@@ -149,6 +149,18 @@ export default async function CompanionDetailPage({
             <SectionTitle>DETAILS</SectionTitle>
             <CompanionForm areas={areas} companion={companion} />
           </Card>
+
+          {/* Delete — owner only, shown below the edit form */}
+          {isOwner && (
+            <Card tone="danger">
+              <SectionTitle>DELETE COMPANION</SectionTitle>
+              <p className="mb-3 text-[13px] leading-[1.5] text-ink/60">
+                Permanently removes this companion and his photo. Cannot be undone. Blocked
+                if any confirmed or completed bookings exist.
+              </p>
+              <DeleteCompanionForm companionId={companion.id} name={companion.displayName} />
+            </Card>
+          )}
         </div>
 
         <div className="flex flex-col gap-4">
@@ -198,5 +210,23 @@ export default async function CompanionDetailPage({
 
       <AuditNote />
     </>
+  )
+}
+
+function DeleteCompanionForm({ companionId, name }: { companionId: string; name: string }) {
+  return (
+    <form action={deleteCompanion}>
+      <input type="hidden" name="companionId" value={companionId} />
+      {/* confirm() runs in the browser via the onClick below */}
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+        className="border-rose/40 text-rose-deep hover:border-rose hover:bg-rose-tint"
+      >
+        Delete {name}
+      </Button>
+      <p className="mt-2 text-[11px] text-ink/40">Owner role only. Blocked while bookings are active.</p>
+    </form>
   )
 }

@@ -845,3 +845,78 @@ export async function listOrphanedPayments(): Promise<OrphanedPayment[]> {
     }))
     .filter((p) => !p.refunded)
 }
+
+// --- manual refund tracker ---------------------------------------------------
+
+export type ManualRefundRow = {
+  id: string
+  bookingId: string
+  bookingReference: string
+  customerName: string
+  companionName: string
+  amountPaise: number
+  status: RefundStatus
+  tierApplied: string | null
+  paymentMethod: string | null
+  reason: string | null
+  proofUrl: string | null
+  createdAt: string
+  settledAt: string | null
+}
+
+export type ManualRefundTrackerData = {
+  pending: ManualRefundRow[]
+  completed: ManualRefundRow[]
+  totalOwed: number
+  totalPaid: number
+}
+
+export async function getManualRefundTrackerData(): Promise<ManualRefundTrackerData> {
+  const service = createServiceClient()
+
+  const { data } = await service
+    .from('refunds')
+    .select(
+      `id, amount_paise, status, tier_applied, notes, proof_url, created_at, settled_at,
+       bookings (
+         id, reference, cancellation_reason,
+         customers ( full_name ),
+         companions ( display_name ),
+         payments ( method, status )
+       )`,
+    )
+    .order('created_at', { ascending: false })
+    .limit(500)
+
+  const rows: ManualRefundRow[] = ((data as any[]) ?? []).map((r) => {
+    const booking = r.bookings
+    const capturedPayment = ((booking?.payments ?? []) as any[]).find(
+      (p: any) => p.status === 'captured' || p.status === 'partially_refunded' || p.status === 'refunded',
+    )
+    return {
+      id: r.id,
+      bookingId: booking?.id ?? '',
+      bookingReference: booking?.reference ?? '',
+      customerName: booking?.customers?.full_name ?? '—',
+      companionName: booking?.companions?.display_name ?? '—',
+      amountPaise: r.amount_paise,
+      status: r.status as RefundStatus,
+      tierApplied: r.tier_applied,
+      paymentMethod: capturedPayment?.method ?? null,
+      reason: booking?.cancellation_reason ?? null,
+      proofUrl: r.proof_url ?? null,
+      createdAt: r.created_at,
+      settledAt: r.settled_at ?? null,
+    }
+  })
+
+  const pending = rows.filter((r) => r.status !== 'success')
+  const completed = rows.filter((r) => r.status === 'success')
+
+  return {
+    pending,
+    completed,
+    totalOwed: pending.reduce((sum, r) => sum + r.amountPaise, 0),
+    totalPaid: completed.reduce((sum, r) => sum + r.amountPaise, 0),
+  }
+}

@@ -216,6 +216,7 @@ as $$
 declare
   v_from booking_status;
 begin
+  -- Serialise concurrent status writes on the same booking row.
   select status into v_from
     from bookings
    where id = p_booking_id
@@ -230,16 +231,20 @@ begin
     return v_from;
   end if;
 
-  update bookings
-     set status       = p_to,
-         confirmed_at = case when p_to = 'confirmed'
-                             then coalesce(confirmed_at, now()) else confirmed_at end,
-         completed_at = case when p_to = 'completed'
-                             then coalesce(completed_at, now()) else completed_at end
-   where id = p_booking_id;
-
+  -- Single round-trip: update + audit via a writable CTE.
+  with upd as (
+    update bookings
+       set status       = p_to,
+           confirmed_at = case when p_to = 'confirmed'
+                               then coalesce(confirmed_at, now()) else confirmed_at end,
+           completed_at = case when p_to = 'completed'
+                               then coalesce(completed_at, now()) else completed_at end
+     where id = p_booking_id
+    returning id
+  )
   insert into booking_events (booking_id, from_status, to_status, actor_type, actor_id, reason)
-  values (p_booking_id, v_from, p_to, p_actor_type, p_actor_id, p_reason);
+  select p_booking_id, v_from, p_to, p_actor_type, p_actor_id, p_reason
+    from upd;
 
   return v_from;
 end;
@@ -259,20 +264,38 @@ language plpgsql volatile
 set search_path = public
 as $$
 declare
-  v_id    uuid;
-  v_count integer := 0;
+  v_ids uuid[];
 begin
-  for v_id in
-    select id from bookings
+  -- Atomically claim and transition all expired-but-pending holds.
+  -- FOR UPDATE SKIP LOCKED: a concurrent cron run skips rows already
+  -- being processed, so no hold is expired twice.
+  with expired as (
+    select id
+      from bookings
      where status = 'pending_payment'
        and hold_expires_at is not null
        and hold_expires_at < now()
      for update skip locked
-  loop
-    perform ac_set_booking_status(v_id, 'expired', 'system', null, 'hold lapsed before payment');
-    v_count := v_count + 1;
-  end loop;
-  return v_count;
+  ),
+  updated as (
+    update bookings b
+       set status = 'expired'
+      from expired e
+     where b.id = e.id
+       and b.status = 'pending_payment'
+    returning b.id
+  )
+  select array_agg(id) into v_ids from updated;
+
+  if v_ids is null or array_length(v_ids, 1) = 0 then
+    return 0;
+  end if;
+
+  insert into booking_events (booking_id, from_status, to_status, actor_type, actor_id, reason)
+  select unnest(v_ids), 'pending_payment', 'expired', 'system', null,
+         'hold lapsed before payment';
+
+  return array_length(v_ids, 1);
 end;
 $$;
 
@@ -282,19 +305,35 @@ language plpgsql volatile
 set search_path = public
 as $$
 declare
-  v_id    uuid;
-  v_count integer := 0;
+  v_ids uuid[];
 begin
-  for v_id in
-    select id from bookings
+  with ended as (
+    select id
+      from bookings
      where status = 'confirmed'
        and ends_at < now()
      for update skip locked
-  loop
-    perform ac_set_booking_status(v_id, 'completed', 'system', null, 'end time passed');
-    v_count := v_count + 1;
-  end loop;
-  return v_count;
+  ),
+  updated as (
+    update bookings b
+       set status       = 'completed',
+           completed_at = coalesce(b.completed_at, now())
+      from ended e
+     where b.id = e.id
+       and b.status = 'confirmed'
+    returning b.id
+  )
+  select array_agg(id) into v_ids from updated;
+
+  if v_ids is null or array_length(v_ids, 1) = 0 then
+    return 0;
+  end if;
+
+  insert into booking_events (booking_id, from_status, to_status, actor_type, actor_id, reason)
+  select unnest(v_ids), 'confirmed', 'completed', 'system', null,
+         'end time passed';
+
+  return array_length(v_ids, 1);
 end;
 $$;
 

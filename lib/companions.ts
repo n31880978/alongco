@@ -1,4 +1,5 @@
 import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
 import { getSettings } from '@/lib/settings'
 import {
@@ -75,23 +76,48 @@ function toCard(row: any): CompanionCard {
 }
 
 export const listCompanions = cache(async (): Promise<CompanionCard[]> => {
-  const supabase = createPublicClient()
-  if (!supabase) return []
-
-  const { data, error } = await supabase
-    .from('companions')
-    .select(
-      `id, slug, display_name, bio, photo_path, hourly_rate_paise, is_accepting,
-       companion_areas ( areas ( id, name, sort_order ) ),
-       reviews ( rating )`,
-    )
-    .order('created_at', { ascending: true })
-
-  if (error || !data) return []
-  return (data as any[]).map(toCard)
+  return fetchCompanions()
 })
 
+/**
+ * Cross-request cache: the companion list is fetched at most once per 60 s.
+ * This is the most-hit query in the system (landing, browse, and slot pages
+ * all call it). The ISR pages (revalidate=300) layer on top — the unstable_cache
+ * means the DB isn't hit even if the ISR boundary re-renders within the window.
+ */
+const fetchCompanions = unstable_cache(
+  async (): Promise<CompanionCard[]> => {
+    const supabase = createPublicClient()
+    if (!supabase) return []
+
+    const { data, error } = await supabase
+      .from('companions')
+      .select(
+        `id, slug, display_name, bio, photo_path, hourly_rate_paise, is_accepting,
+       companion_areas ( areas ( id, name, sort_order ) ),
+       reviews ( rating )`,
+      )
+      .order('created_at', { ascending: true })
+
+    if (error || !data) return []
+    return (data as any[]).map(toCard)
+  },
+  ['companions-list'],
+  { revalidate: 60, tags: ['companions'] },
+)
+
 export const getCompanion = cache(
+  async (slug: string): Promise<CompanionProfile | null> => {
+    return fetchCompanion(slug)
+  },
+)
+
+/**
+ * Cross-request cache per slug. Profile pages are ISR (revalidate=300) but
+ * this ensures multiple concurrent cold requests for the same companion
+ * collapse to a single DB query.
+ */
+const fetchCompanion = unstable_cache(
   async (slug: string): Promise<CompanionProfile | null> => {
     const supabase = createPublicClient()
     if (!supabase) return null
@@ -134,9 +160,17 @@ export const getCompanion = cache(
         })),
     }
   },
+  ['companion'],
+  { revalidate: 60, tags: ['companions'] },
 )
 
 export const listAreas = cache(
+  async (): Promise<{ id: string; name: string }[]> => {
+    return fetchAreas()
+  },
+)
+
+const fetchAreas = unstable_cache(
   async (): Promise<{ id: string; name: string }[]> => {
     const supabase = createPublicClient()
     if (!supabase) return []
@@ -147,6 +181,8 @@ export const listAreas = cache(
       .order('sort_order', { ascending: true })
     return data ?? []
   },
+  ['areas-list'],
+  { revalidate: 3600, tags: ['companions'] },
 )
 
 /**

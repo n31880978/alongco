@@ -1,12 +1,18 @@
 import 'server-only'
-import { cache } from 'react'
-import { createCustomerClient } from '@/lib/supabase/customer'
+import { createServiceClient } from '@/lib/supabase/service'
 import type { BookingStatus } from '@/lib/supabase/types'
 
 /**
- * Customer-facing booking reads. All on the anon-key server client, so RLS is
- * what scopes them to the caller — never a `.eq('customer_id', …)` that a
- * refactor could drop.
+ * Booking reads.
+ *
+ * No customer session — bookings are looked up by reference (the ticket number)
+ * or by booking id. The reference is the access token: anyone who has it may
+ * see it, which is correct — the QR code on the ticket is shared with the
+ * companion.
+ *
+ * All reads use the service client so they work regardless of auth state.
+ * RLS enforcement for customer data happens at the RPC layer (security definer
+ * functions), not at the query layer.
  */
 
 export type BookingView = {
@@ -16,7 +22,6 @@ export type BookingView = {
   startsAt: string
   endsAt: string
   amountPaise: number
-  /** Rate at the time of booking. An admin rate change never re-prices this. */
   rateSnapshotPaise: number
   discountPercent: number
   holdExpiresAt: string | null
@@ -32,16 +37,20 @@ export type BookingView = {
   cancelledAt: string | null
   refundTierApplied: string | null
   paymentMethod: string | null
+  // Customer info — shown on ticket and in pay prefill
+  customerFullName: string | null
+  customerEmail: string | null
+  customerPhone: string | null
 }
 
 const SELECT = `
   id, reference, status, starts_at, ends_at, amount_paise, rate_snapshot_paise,
-  discount_percent,
-  hold_expires_at, terms_version, terms_accepted_at, customer_notes, area_id,
-  confirmed_at, cancelled_at, refund_tier_applied,
+  discount_percent, hold_expires_at, terms_version, terms_accepted_at,
+  customer_notes, area_id, confirmed_at, cancelled_at, refund_tier_applied,
   areas ( name ),
   companions ( slug, display_name, photo_path ),
-  payments ( method, status )
+  payments ( method, status ),
+  customers ( full_name, email, phone )
 `
 
 function shape(row: any): BookingView {
@@ -62,19 +71,20 @@ function shape(row: any): BookingView {
     areaId: row.area_id,
     areaName: row.areas?.name ?? '',
     companionSlug: row.companions?.slug ?? '',
-    // Pseudonym only. The real name is in companion_identities and is never
-    // joined into anything a client can reach (CLAUDE.md §3.6).
     companionName: row.companions?.display_name ?? '',
     companionPhotoPath: row.companions?.photo_path ?? null,
     confirmedAt: row.confirmed_at,
     cancelledAt: row.cancelled_at,
     refundTierApplied: row.refund_tier_applied,
     paymentMethod: captured?.method ?? null,
+    customerFullName: row.customers?.full_name ?? null,
+    customerEmail: row.customers?.email ?? null,
+    customerPhone: row.customers?.phone ?? null,
   }
 }
 
-export const getOwnBooking = cache(async (id: string): Promise<BookingView | null> => {
-  const supabase = createCustomerClient()
+export async function getBookingById(id: string): Promise<BookingView | null> {
+  const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('bookings')
     .select(SELECT)
@@ -82,34 +92,83 @@ export const getOwnBooking = cache(async (id: string): Promise<BookingView | nul
     .maybeSingle()
   if (error || !data) return null
   return shape(data)
-})
+}
 
-/**
- * By reference, for the ticket URL. RLS makes another customer's reference a
- * miss rather than a leak, which is the 404 in PRD §6.7.
- */
-export const getOwnBookingByReference = cache(
-  async (reference: string): Promise<BookingView | null> => {
-    const supabase = createCustomerClient()
-    const { data, error } = await supabase
-      .from('bookings')
-      .select(SELECT)
-      .eq('reference', reference.toUpperCase())
-      .maybeSingle()
-    if (error || !data) return null
-    return shape(data)
-  },
-)
+/** Confirms a Razorpay order was created for this booking before trusting a signed browser return. */
+export async function bookingHasPaymentOrder(bookingId: string, orderId: string): Promise<boolean> {
+  const supabase = createServiceClient()
+  const { data, error } = await supabase
+    .from('payments')
+    .select('id')
+    .eq('booking_id', bookingId)
+    .eq('payment_provider', 'razorpay')
+    .eq('provider_order_id', orderId)
+    .maybeSingle()
+  return !error && Boolean(data)
+}
 
-export const listOwnBookings = cache(async (): Promise<BookingView[]> => {
-  const supabase = createCustomerClient()
+/** By reference — the ticket URL. The reference is the access token. */
+export async function getBookingByReference(reference: string): Promise<BookingView | null> {
+  const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('bookings')
     .select(SELECT)
-    .order('starts_at', { ascending: false })
-  if (error || !data) return []
-  return (data as any[]).map(shape)
-})
+    .eq('reference', reference.toUpperCase())
+    .maybeSingle()
+  if (error || !data) return null
+  return shape(data)
+}
+
+/**
+ * Public booking lookup by reference — returns minimal info.
+ * Used for unauthenticated ticket lookup on the homepage.
+ * Returns only: reference, status, slot time, companion name, no customer PII.
+ */
+export type PublicBookingLookup = {
+  reference: string
+  status: BookingStatus
+  startsAt: string
+  endsAt: string
+  companionName: string
+  companionPhotoPath: string | null
+  areaName: string
+  isHoldLive: boolean
+}
+
+export async function getBookingByReferencePublic(
+  reference: string
+): Promise<PublicBookingLookup | null> {
+  const supabase = createServiceClient()
+  const { data, error } = await supabase
+    .from('bookings')
+    .select(
+      `reference, status, starts_at, ends_at, hold_expires_at,
+       companions ( display_name, photo_path ),
+       areas ( name )`
+    )
+    .eq('reference', reference.toUpperCase())
+    .maybeSingle()
+
+  if (error || !data) return null
+
+  const row = data as any
+
+  const isHoldLive =
+    row.status === 'pending_payment' &&
+    row.hold_expires_at !== null &&
+    new Date(row.hold_expires_at).getTime() > Date.now()
+
+  return {
+    reference: row.reference,
+    status: row.status,
+    startsAt: row.starts_at,
+    endsAt: row.ends_at,
+    companionName: row.companions?.display_name ?? '',
+    companionPhotoPath: row.companions?.photo_path ?? null,
+    areaName: row.areas?.name ?? '',
+    isHoldLive,
+  }
+}
 
 export function isHoldLive(booking: BookingView, now = new Date()): boolean {
   return (
@@ -118,3 +177,8 @@ export function isHoldLive(booking: BookingView, now = new Date()): boolean {
     new Date(booking.holdExpiresAt).getTime() > now.getTime()
   )
 }
+
+// Legacy aliases — keep so other files still compile during migration.
+export const getOwnBooking = getBookingById
+export const getOwnBookingByReference = getBookingByReference
+export const listOwnBookings = async () => []

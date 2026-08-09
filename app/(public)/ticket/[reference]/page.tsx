@@ -4,8 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import QRCode from 'qrcode'
 import { Aurora } from '@/components/brand/aurora'
 import { Wordmark } from '@/components/brand/mark'
-import { getOwnBookingByReference } from '@/lib/booking/queries'
-import { getCurrentCustomer } from '@/lib/auth/session'
+import { getBookingByReference } from '@/lib/booking/queries'
 import { getSettings } from '@/lib/settings'
 import { formatPaise } from '@/lib/booking/pricing'
 import { CONDUCT_SUMMARY } from '@/lib/booking/terms'
@@ -14,7 +13,8 @@ import { SERVICE_HOURS_SHORT, SUPPORT_PHONE, SUPPORT_PHONE_HREF } from '@/lib/co
 import { Ticket } from './_components/ticket'
 import { TrackView } from '@/components/analytics/ga'
 
-// A ticket is private and per-customer. Never prerendered, never shared-cached
+// A ticket is public — anyone with the reference (which is the QR code) can view it.
+// The reference IS the access token. Never prerendered, never shared-cached
 // (see the no-store header for /ticket/* in next.config.ts).
 export const dynamic = 'force-dynamic'
 
@@ -30,15 +30,8 @@ export default async function TicketPage({
 }) {
   const { reference } = await params
 
-  const customer = await getCurrentCustomer()
-  if (!customer) {
-    redirect(`/sign-in?next=${encodeURIComponent(`/ticket/${reference}`)}`)
-  }
-
-  // RLS scopes bookings to the caller, so another customer's reference simply
-  // returns nothing — which is the 404 required by PRD §6.7, not a 403 that
-  // would confirm the reference exists.
-  const booking = await getOwnBookingByReference(reference)
+  // Reference is the access token. Service-role read with no auth check.
+  const booking = await getBookingByReference(reference)
   if (!booking) notFound()
 
   // A ticket exists once payment is captured. Before that there is nothing to show.
@@ -88,6 +81,9 @@ export default async function TicketPage({
             ? 'Keep this record. Any refund due follows the refund policy and appears on your original payment method.'
             : `Keep this ticket. We will message you on WhatsApp within ${settings.confirmationSlaMinutes} minutes with the meeting details.`}
         </p>
+        <p className="mb-1.5 animate-fade font-sans text-[11px] leading-[1.5] text-white/40 [animation-delay:.15s]">
+          Reference: <span className="font-mono font-semibold">{booking.reference}</span>
+        </p>
       </div>
 
       <Ticket
@@ -99,7 +95,7 @@ export default async function TicketPage({
         dateLabel={formatDateLong(starts, settings.timezone)}
         timeLabel={`${formatSlotLabel(starts, settings.timezone)} – ${formatSlotLabel(ends, settings.timezone)}`}
         areaLabel={booking.areaName}
-        bookedByLabel={firstName(customer.full_name)}
+        bookedByLabel={firstName(booking.customerFullName)}
         amountLabel={formatPaise(booking.amountPaise)}
         methodLabel={`${(booking.paymentMethod ?? 'PAID').toUpperCase()} · RAZORPAY`}
         termsLabel={`TERMS ${booking.termsVersion} ACCEPTED`}

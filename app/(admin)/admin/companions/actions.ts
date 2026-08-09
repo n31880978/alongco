@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase/service'
 import { requireAdmin, requireRole, writeAudit } from '@/lib/admin/auth'
@@ -99,6 +99,7 @@ export async function createCompanion(
   })
 
   revalidatePath('/admin/companions')
+  revalidateTag('companions', 'max')
   redirect(`/admin/companions/${companionId}`)
 }
 
@@ -158,6 +159,7 @@ export async function updateCompanion(
 
   revalidatePath('/admin/companions')
   revalidatePath(`/admin/companions/${id.data}`)
+  revalidateTag('companions', 'max')
   return { ok: true }
 }
 
@@ -195,6 +197,7 @@ export async function toggleCompanion(formData: FormData): Promise<void> {
 
   revalidatePath('/admin/companions')
   revalidatePath(`/admin/companions/${id}`)
+  revalidateTag('companions', 'max')
 }
 
 // --- weekly availability and blackouts ---------------------------------------
@@ -242,6 +245,7 @@ export async function addAvailabilityRule(
   })
 
   revalidatePath(`/admin/companions/${companionId}`)
+  revalidateTag('companions', 'max')
   return { ok: true }
 }
 
@@ -261,6 +265,7 @@ export async function removeAvailabilityRule(formData: FormData): Promise<void> 
     metadata: { rule_id: id.data },
   })
   revalidatePath(`/admin/companions/${companionId.data}`)
+  revalidateTag('companions', 'max')
 }
 
 const blackoutSchema = z.object({
@@ -308,6 +313,7 @@ export async function addBlackout(
   })
 
   revalidatePath(`/admin/companions/${companionId}`)
+  revalidateTag('companions', 'max')
   return { ok: true }
 }
 
@@ -327,6 +333,7 @@ export async function removeBlackout(formData: FormData): Promise<void> {
     metadata: { blackout_id: id.data },
   })
   revalidatePath(`/admin/companions/${companionId.data}`)
+  revalidateTag('companions', 'max')
 }
 
 // --- identity, owner only ----------------------------------------------------
@@ -394,11 +401,61 @@ export async function saveIdentity(
   })
 
   revalidatePath(`/admin/companions/${companionId}`)
+  revalidateTag('companions', 'max')
   return { ok: true }
 }
 
-// --- profile photo -----------------------------------------------------------
+// --- delete companion (owner only) -------------------------------------------
 
+/**
+ * Hard-delete a companion. Owner role only.
+ *
+ * Refused if confirmed/completed/pending bookings exist. Cancel or resolve
+ * those first — they may be needed for refunds and reconciliation.
+ */
+export async function deleteCompanion(formData: FormData): Promise<void> {
+  const admin = await requireRole('owner')
+
+  const id = z.string().uuid().safeParse(formData.get('companionId'))
+  if (!id.success) return
+
+  const service = createServiceClient()
+
+  const { data: activeBookings } = await service
+    .from('bookings')
+    .select('id')
+    .eq('companion_id', id.data)
+    .in('status', ['confirmed', 'completed', 'pending_payment'])
+    .limit(1)
+
+  if (activeBookings && activeBookings.length > 0) return
+
+  const { data: companion } = await service
+    .from('companions')
+    .select('photo_path, display_name')
+    .eq('id', id.data)
+    .maybeSingle()
+
+  if ((companion as any)?.photo_path) {
+    await service.storage.from('companion-photos').remove([(companion as any).photo_path])
+  }
+
+  const { error } = await service.from('companions').delete().eq('id', id.data)
+  if (error) return
+
+  await writeAudit(admin, {
+    action: 'companion.delete',
+    entityType: 'companion',
+    entityId: id.data,
+    metadata: { display_name: (companion as any)?.display_name ?? '' },
+  })
+
+  revalidatePath('/admin/companions')
+  revalidateTag('companions', 'max')
+  redirect('/admin/companions')
+}
+
+// --- profile photo -----------------------------------------------------------
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
@@ -473,5 +530,6 @@ export async function uploadCompanionPhoto(
 
   revalidatePath(`/admin/companions/${id.data}`)
   revalidatePath('/companions')
+  revalidateTag('companions', 'max')
   return { ok: true }
 }

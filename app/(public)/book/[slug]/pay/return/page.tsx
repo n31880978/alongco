@@ -2,11 +2,15 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { PublicHeader } from '@/components/site/header'
-import { getOwnBooking, isHoldLive } from '@/lib/booking/queries'
-import { getCurrentCustomer } from '@/lib/auth/session'
+import { bookingHasPaymentOrder, getBookingById, isHoldLive } from '@/lib/booking/queries'
 import { SUPPORT_PHONE, SUPPORT_PHONE_HREF } from '@/lib/contact'
 import { verifyCheckoutSignature } from '@/lib/payments/razorpay/verify'
+import {
+  reconcileCapturedCheckout,
+  reconcileLatestPaymentAttempt,
+} from '@/lib/payments/razorpay/reconcile'
 import { PendingPoller } from './_components/pending-poller'
+import { report } from '@/lib/observability/report'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,6 +40,7 @@ export default async function PaymentReturnPage({
   params: Promise<{ slug: string }>
   searchParams: Promise<{
     b?: string
+    checked?: string
     razorpay_order_id?: string
     razorpay_payment_id?: string
     razorpay_signature?: string
@@ -46,12 +51,8 @@ export default async function PaymentReturnPage({
   const b = sp.b
   if (!b) notFound()
 
-  const customer = await getCurrentCustomer()
-  if (!customer) {
-    redirect(`/sign-in?next=${encodeURIComponent(`/book/${slug}/pay/return?b=${b}`)}`)
-  }
-
-  const booking = await getOwnBooking(b)
+  // No auth required. Booking was already created.
+  const booking = await getBookingById(b)
   if (!booking) notFound()
 
   // The webhook has landed. This is the only path to the ticket.
@@ -64,22 +65,28 @@ export default async function PaymentReturnPage({
       <>
         <PublicHeader back={{ href: `/book/${slug}`, label: 'Pick another time' }} />
         <section className="bg-white px-[18px] py-6">
-          <h1 className="mb-2 font-serif text-[21px] font-light leading-[1.25] text-ink">
+          <div className="mb-4 rounded-xl border border-amber/20 bg-amber-tint px-4 py-3.5">
+            <p className="mb-1 font-mono text-[9.5px] font-semibold uppercase tracking-[.08em] text-amber">Hold expired</p>
+            <p className="font-sans text-[13px] leading-[1.55] text-ink/75">
+              The hold ran out before the payment landed.
+            </p>
+          </div>
+          <h1 className="mb-2 font-serif text-[24px] font-light leading-[1.2] text-ink">
             That hold ran out before the payment landed
           </h1>
-          <p className="mb-4 font-sans text-[13px] leading-[1.5] text-ink/65">
+          <p className="mb-5 font-sans text-[13px] leading-[1.55] text-ink/65">
             If money did leave your account, it will be returned automatically — a payment
             against an expired hold is never captured by us. Call us on{' '}
-            <a href={SUPPORT_PHONE_HREF} className="font-mono font-medium text-ink">
+            <a href={SUPPORT_PHONE_HREF} className="font-mono font-semibold text-ink underline underline-offset-2">
               {SUPPORT_PHONE}
             </a>{' '}
             with the reference{' '}
-            <span className="font-mono font-medium text-ink">{booking.reference}</span> and
+            <span className="font-mono font-semibold text-ink">{booking.reference}</span> and
             we will check it while you wait.
           </p>
           <Link
             href={`/book/${slug}`}
-            className="flex h-[46px] items-center justify-center rounded-lg bg-ink font-sans text-[13.5px] font-semibold text-white"
+            className="flex h-[50px] items-center justify-center rounded-xl bg-ink font-sans text-[13.5px] font-semibold text-white"
           >
             Pick another time
           </Link>
@@ -91,17 +98,57 @@ export default async function PaymentReturnPage({
   const stillHeld = isHoldLive(booking)
 
   // Signal only — see the note above. Never a reason to change state.
-  const checkoutCompleted =
+  const signatureValid =
     Boolean(sp.razorpay_order_id && sp.razorpay_payment_id && sp.razorpay_signature) &&
     verifyCheckoutSignature(
       sp.razorpay_order_id!,
       sp.razorpay_payment_id!,
       sp.razorpay_signature!,
     )
+  // A valid signature is necessary but not sufficient: the signed order must
+  // be an order this booking actually created. This prevents a valid callback
+  // from another booking being used to put this booking into a waiting state.
+  const checkoutCompleted =
+    signatureValid &&
+    (await bookingHasPaymentOrder(booking.id, sp.razorpay_order_id!))
+
+  // Webhooks normally complete this before the browser arrives. If they do
+  // not, reconcile directly with Razorpay rather than leaving a real payment
+  // in a perpetual "confirming" state.
+  if (sp.checked !== '1') {
+    try {
+      const reconciliation = checkoutCompleted
+        ? await reconcileCapturedCheckout({
+            bookingId: booking.id,
+            orderId: sp.razorpay_order_id!,
+            paymentId: sp.razorpay_payment_id!,
+          })
+        : await reconcileLatestPaymentAttempt(booking.id)
+      if (reconciliation === 'confirmed') redirect(`/ticket/${booking.reference}`)
+      // Query Razorpay once per return visit. Further UI polling reads only our
+      // database and leaves webhook delivery as the normal asynchronous path.
+      redirect(`/book/${slug}/pay/return?b=${booking.id}&checked=1`)
+    } catch (error) {
+      // Next.js redirect() works by throwing a special NEXT_REDIRECT error.
+      // Re-throw it so the redirect is honoured rather than caught as a failure.
+      if (
+        error instanceof Error &&
+        (error.message === 'NEXT_REDIRECT' || (error as any).digest?.startsWith('NEXT_REDIRECT'))
+      ) {
+        throw error
+      }
+      report('payment', 'Razorpay reconciliation read failed', {
+        severity: 'critical',
+        error,
+        context: { bookingId: booking.id },
+      })
+      redirect(`/book/${slug}/pay/return?b=${booking.id}&checked=1`)
+    }
+  }
 
   return (
     <>
-      <PublicHeader back={{ href: '/bookings', label: 'Your bookings' }} />
+      <PublicHeader back={{ href: `/ticket/${booking.reference}`, label: 'Your ticket' }} />
       <PendingPoller
         reference={booking.reference}
         stillHeld={stillHeld}
